@@ -8,5 +8,5 @@ build_script:
   - md x
   - cd x
   - cmake.exe ..
-  - cmake.exe --verbose --build .
-  - ./example/Debug/http_client.exe`
+  - cmake.exe --verbose . -- VERBOSE=1
+  - ./example/Debug/http_client.exe
