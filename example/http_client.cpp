@@ -6,6 +6,16 @@
 #include <string>
 
 int main() {
+#ifdef _WIN32
+  {
+    WORD version = MAKEWORD(2, 2);
+    WSADATA wsadata;
+    if (WSAStartup(version, &wsadata) != 0) {
+      std::clog << "WSAStartup: failed\n";
+      exit(EXIT_FAILURE);
+    }
+  }
+#endif
   addrinfo hints{};
   hints.ai_flags |= AI_NUMERICSERV;
   hints.ai_socktype = SOCK_STREAM;
@@ -25,7 +35,7 @@ int main() {
     }
     std::clog << "socket: success\n";
     if (remk_platform_connect(sock, ai->ai_addr,
-        (remk_platform_socklen_t)ai->ai_addrlen) == 0) {
+                              (remk_platform_socklen_t)ai->ai_addrlen) == 0) {
       std::clog << "connect: success\n";
       break;
     }
@@ -38,8 +48,8 @@ int main() {
     exit(EXIT_FAILURE);
   }
   std::string req = "GET /robots.txt HTTP/1.0\r\n\r\n";
-  auto nbytes = remk_platform_send(
-      sock, req.c_str(), (remk_platform_size_t)req.size(), 0);
+  auto nbytes = remk_platform_send(sock, req.c_str(),
+                                   (remk_platform_size_t)req.size(), 0);
   if (nbytes < 0 || (size_t)nbytes != req.size()) {
     std::clog << "send (retval): " << nbytes << "\n";
     std::clog << "send (errno): " << remk_platform_get_last_error() << "\n";
