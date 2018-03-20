@@ -3,6 +3,8 @@
 namespace remk {
 namespace platform {
 
+// TODO(bassosimone): make sure this works on iOS armv7s. For reference
+// see https://github.com/measurement-kit/measurement-kit/issues/1319.
 static thread_local Context *pointer_ = nullptr;
 
 /*static*/ void Context::set_thread_local(Context *p) noexcept { pointer_ = p; }
@@ -12,6 +14,7 @@ static thread_local Context *pointer_ = nullptr;
   return (pointer_ != nullptr) ? pointer_ : &global_context_;
 }
 
+// TODO(bassosimone): see whether we can use a monotonic clock here.
 int Context::timespec_get(timespec *ts, int base) noexcept {
 #ifdef _WIN32
   return ::timespec_get(ts, base);
