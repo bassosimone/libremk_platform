@@ -1,5 +1,7 @@
 # Really Experimental MK platform
 
+[![Build Status](https://travis-ci.org/bassosimone/libremk_platform.svg?branch=master)](https://travis-ci.org/bassosimone/libremk_platform)
+
 The purpose of this repository is to provide portable, hookable replacements for
 common socket and related APIs. The objective is to provide a common API
 that can be used both on Unix and on Windows to implement basic networking stuff
