@@ -19,5 +19,5 @@ script:
   - mkdir x
   - cd x
   - cmake ..
-  - make VERBOSE=1
+  - make
   - ./example/http_client
