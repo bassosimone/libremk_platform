@@ -6,13 +6,13 @@
 namespace remk {
 namespace platform {
 
-class REMK_PLATFORM_EXTERN Context {
+class Context {
 public:
   static void set_thread_local(Context *ctx) noexcept;
 
   static Context *get_thread_local() noexcept;
 
-  virtual int gettimeofday(timeval *tv, struct timezone *tz) noexcept;
+  virtual int timespec_get(timespec *ts, int base) noexcept;
 
   virtual int get_last_error() noexcept;
 

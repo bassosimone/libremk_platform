@@ -15,12 +15,12 @@ add_library(
   include/remk/platform/errno.h
   include/remk/platform/socket.h
   include/remk/platform/select.h
-  lib/remk/platform/select.cpp
-  lib/remk/platform/socket.cpp
-  lib/remk/platform/context.cpp
-  lib/remk/platform/errno.cpp
-  lib/remk/platform/netdb.cpp
-  lib/remk/platform/time.cpp
+  src/remk/platform/select.cpp
+  src/remk/platform/socket.cpp
+  src/remk/platform/context.cpp
+  src/remk/platform/errno.cpp
+  src/remk/platform/netdb.cpp
+  src/remk/platform/time.cpp
 )
 target_include_directories(
   remk_platform
@@ -39,3 +39,6 @@ install(
   DESTINATION
   lib
 )
+if(WIN32)
+  target_link_libraries(remk_platform ws2_32)
+endif()

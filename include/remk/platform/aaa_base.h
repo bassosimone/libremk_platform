@@ -3,7 +3,7 @@
 
 #ifdef _WIN32
 #include <winsock2.h>
-#include <time.h>
+#include <ws2tcpip.h>
 #else
 #include <sys/types.h>
 #include <sys/select.h>
@@ -14,14 +14,10 @@
 #include <unistd.h>
 #endif
 
-#if defined(_WIN32) && defined(REMK_PLATFORM_BUILD_DLL)
-#define REMK_PLATFORM_EXTERN __declspec(dllexport)
-#elif defined(_WIN32) && defined(REMK_PLATFORM_USE_DLL)
-#define REMK_PLATFORM_EXTERN __declspec(dllimport)
-#elif defined(__GNUC__) && __GNUC__ >= 4
-#define REMK_PLATFORM_EXTERN __attribute__((visibility("default")))
-#else
-#define REMK_PLATFORM_EXTERN /* Nothing. */
+#include <time.h>
+
+#ifndef TIME_UTC
+#define TIME_UTC 1
 #endif
 
 #if defined __cplusplus && __cplusplus >= 201103L
@@ -46,10 +42,4 @@ typedef socklen_t remk_platform_socklen_t;
 typedef ssize_t remk_platform_ssize_t;
 #endif
 
-#ifdef _WIN32
-struct timezone {
-  int tz_minuteswest;
-  int tz_dsttime;
-};
-#endif
 #endif

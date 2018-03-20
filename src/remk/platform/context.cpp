@@ -14,28 +14,21 @@ static thread_local Context *pointer_ = nullptr;
   return (pointer_ != nullptr) ? pointer_ : &global_context_;
 }
 
-int Context::gettimeofday(timeval *tv, struct timezone *tz) noexcept {
+int Context::timespec_get(timespec *ts, int base) noexcept {
 #ifdef _WIN32
-  if (tv == nullptr) {
-    WSASetLastError(WSAEFAULT);
-    return -1;
-  }
-  if (tz != nullptr) {
-    WSASetLastError(WSAEINVAL);
-    return -1;
-  }
-  timespec ts{};
-  if (timespec_get(&ts, TIME_UTC) != TIME_UTC) {
-    WSASetLastError(WSAEFAULT);
-    return -1;
-  }
-  return (double)ts.tv_sec + (double)ts.tv_nsec / 1000000000;
+  return ::timespec_get(ts, base);
 #else
-  if (tz != nullptr) {
+  if (ts == nullptr || base != TIME_UTC) {
     errno = EINVAL;
-    return -1;
+    return 0;
   }
-  return ::gettimeofday(tv, nullptr);
+  timeval tv{};
+  if (::gettimeofday(&tv, nullptr) != 0) {
+    return 0;
+  }
+  ts->tv_sec = tv.tv_sec;
+  ts->tv_nsec = tv.tv_usec * 1'000;
+  return TIME_UTC;
 #endif
 }
 
