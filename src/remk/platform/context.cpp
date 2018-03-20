@@ -62,6 +62,11 @@ remk_platform_socket_t Context::socket(int domain, int type,
   return ::socket(domain, type, protocol);
 }
 
+int Context::connect(remk_platform_socket_t handle, const sockaddr *saddr,
+    remk_platform_socklen_t salen) noexcept {
+  return ::connect(handle, saddr, salen);
+}
+
 remk_platform_ssize_t Context::recv(remk_platform_socket_t handle,
       remk_platform_buffer_type_t *buffer, remk_platform_size_t count,
       int flags) noexcept {

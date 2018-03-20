@@ -1,0 +1,2 @@
+add_executable(http_client http_client.cpp)
+target_link_libraries(http_client remk_platform)
