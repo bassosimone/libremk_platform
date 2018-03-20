@@ -5,16 +5,15 @@ common socket and related APIs. The objective is to provide a common API
 that can be used both on Unix and on Windows to implement basic networking stuff
 with the option to provide thread-local replacements for each API.
 
-Measurement Kit code should use this API as its lowest level API.
-Dependencies and code contributed to [Measurement
-Kit](https://github.com/measurement-kit/measurement-kit) may be
-mechanichally refactored using [coccinelle](
-https://github.com/coccinelle/coccinelle) to use the replacements
-provided in this library rather than the corresponding libc API.
-This means, for example, using `remk_platform_getaddrinfo()` instead
+Measurement Kit code should use this as its lowest level API. Dependencies and
+code contributed to [Measurement Kit](
+https://github.com/measurement-kit/measurement-kit) may be mechanichally
+refactored using [coccinelle](https://github.com/coccinelle/coccinelle) to use
+the replacements provided in this library rather than the corresponding libc
+API. This means, for example, using `remk_platform_getaddrinfo()` instead
 of `getaddrinfo()`.
 
-The usage of these replacements has four advantages:
+The usage of these replacements has three advantages:
 
 1. these replacements are coded with Unix / Windows portability in mind, with
    some minor changes (e.g. using `remk_platform_get_last_error()` instead
