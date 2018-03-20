@@ -35,9 +35,6 @@ add the `remk_platform_` prefix to several APIs) and that you loose a little
 bit of performance, because you need to check a couple of pointers when
 dispatching a call, to decide whether to call the real API or a replacement.
 
-This repository is currently a proposal. Hence the `re` (really experimental)
-prefix and, as such, is not part of Measurement Kit repository.
-
 ## Building on Unix
 
 ```
