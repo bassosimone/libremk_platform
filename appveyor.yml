@@ -4,5 +4,5 @@ build_script:
   - md x
   - cd x
   - cmake.exe ..
-  - cmake.exe --build --verbose
+  - nmake.exe
   - ./example/Debug/http_client.exe`

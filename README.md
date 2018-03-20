@@ -54,7 +54,7 @@ Omit `-DBUILD_SHARED_LIBS=ON` to build a static library.
 md build
 cd build
 cmake.exe -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=ON -DBUILD_SHARED_LIBS=ON ..
-cmake --build
+nmake.exe
 ```
 
 Omit `-DBUILD_SHARED_LIBS=ON` to build a static library.
