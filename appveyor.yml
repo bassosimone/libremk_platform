@@ -9,4 +9,4 @@ build_script:
   - cd x
   - cmake.exe ..
   - cmake.exe --build .
-  - ./example/Debug/http_client.exe
+  - .\example\Debug\http_client.exe
