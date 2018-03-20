@@ -33,7 +33,7 @@ The usage of these replacements has three advantages:
 The main disadvantages are that you need to write more (namely you need to
 add the `remk_platform_` prefix to several APIs) and that you loose a little
 bit of performance, because you need to check a couple of pointers when
-dispatching APIs, to decide whether to call the real API or a replacement.
+dispatching a call, to decide whether to call the real API or a replacement.
 
 This repository is currently a proposal. Hence the `re` (really experimental)
 prefix and, as such, is not part of Measurement Kit repository.
