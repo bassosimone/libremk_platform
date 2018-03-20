@@ -7,9 +7,9 @@
 extern "C" {
 #endif
 
-int remk_platform_select(int maxfd, fd_set *readset,
-    fd_set *writeset, fd_set *exceptset,
-    struct timeval *timeout) REMK_PLATFORM_NOEXCEPT;
+int remk_platform_select(int maxfd, fd_set *readset, fd_set *writeset,
+                         fd_set *exceptset,
+                         struct timeval *timeout) REMK_PLATFORM_NOEXCEPT;
 
 #ifdef __cplusplus
 }

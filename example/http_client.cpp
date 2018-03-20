@@ -45,7 +45,7 @@ int main() {
     exit(EXIT_FAILURE);
   }
   char buffer[7];
-  nbytes = remk_platform_recv(sock, buffer, sizeof (buffer) - 1, 0);
+  nbytes = remk_platform_recv(sock, buffer, sizeof(buffer) - 1, 0);
   if (nbytes <= 0) {
     std::clog << "recv (retval): " << nbytes << "\n";
     std::clog << "recv (errno): " << remk_platform_get_last_error() << "\n";

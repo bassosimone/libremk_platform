@@ -5,12 +5,12 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #else
-#include <sys/types.h>
+#include <errno.h>
+#include <netdb.h>
 #include <sys/select.h>
 #include <sys/socket.h>
 #include <sys/time.h>
-#include <errno.h>
-#include <netdb.h>
+#include <sys/types.h>
 #include <unistd.h>
 #endif
 
@@ -33,7 +33,7 @@ typedef SOCKET remk_platform_socket_t;
 typedef char remk_platform_buffer_type_t;
 typedef int remk_platform_size_t;
 typedef int remk_platform_socklen_t;
-typedef int remk_platform_ssize_t; 
+typedef int remk_platform_ssize_t;
 #else
 typedef int remk_platform_socket_t;
 typedef void remk_platform_buffer_type_t;

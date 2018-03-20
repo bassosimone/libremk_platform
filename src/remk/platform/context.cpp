@@ -5,9 +5,7 @@ namespace platform {
 
 static thread_local Context *pointer_ = nullptr;
 
-/*static*/ void Context::set_thread_local(Context *p) noexcept {
-  pointer_ = p;
-}
+/*static*/ void Context::set_thread_local(Context *p) noexcept { pointer_ = p; }
 
 /*static*/ Context *Context::get_thread_local() noexcept {
   static Context global_context_;
@@ -49,7 +47,7 @@ void Context::set_last_error(int error_code) noexcept {
 }
 
 int Context::getaddrinfo(const char *hostname, const char *servname,
-      const addrinfo *hints, addrinfo **res) noexcept {
+                         const addrinfo *hints, addrinfo **res) noexcept {
   return ::getaddrinfo(hostname, servname, hints, res);
 }
 
@@ -58,24 +56,26 @@ void Context::freeaddrinfo(addrinfo *aip) noexcept {
 }
 
 remk_platform_socket_t Context::socket(int domain, int type,
-      int protocol) noexcept {
+                                       int protocol) noexcept {
   return ::socket(domain, type, protocol);
 }
 
 int Context::connect(remk_platform_socket_t handle, const sockaddr *saddr,
-    remk_platform_socklen_t salen) noexcept {
+                     remk_platform_socklen_t salen) noexcept {
   return ::connect(handle, saddr, salen);
 }
 
 remk_platform_ssize_t Context::recv(remk_platform_socket_t handle,
-      remk_platform_buffer_type_t *buffer, remk_platform_size_t count,
-      int flags) noexcept {
+                                    remk_platform_buffer_type_t *buffer,
+                                    remk_platform_size_t count,
+                                    int flags) noexcept {
   return ::recv(handle, buffer, count, flags);
 }
 
 remk_platform_ssize_t Context::send(remk_platform_socket_t handle,
-      const remk_platform_buffer_type_t *buffer, remk_platform_size_t count,
-      int flags) noexcept {
+                                    const remk_platform_buffer_type_t *buffer,
+                                    remk_platform_size_t count,
+                                    int flags) noexcept {
   return ::send(handle, buffer, count, flags);
 }
 
@@ -88,7 +88,7 @@ int Context::closesocket(remk_platform_socket_t handle) noexcept {
 }
 
 int Context::select(int maxfd, fd_set *readset, fd_set *writeset,
-      fd_set *exceptset, timeval *timeout) noexcept {
+                    fd_set *exceptset, timeval *timeout) noexcept {
   return ::select(maxfd, readset, writeset, exceptset, timeout);
 }
 

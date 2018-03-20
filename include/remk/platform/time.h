@@ -7,8 +7,8 @@
 extern "C" {
 #endif
 
-int remk_platform_timespec_get(
-    struct timespec *ts, int base) REMK_PLATFORM_NOEXCEPT;
+int remk_platform_timespec_get(struct timespec *ts,
+                               int base) REMK_PLATFORM_NOEXCEPT;
 
 #ifdef __cplusplus
 }

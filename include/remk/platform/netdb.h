@@ -7,12 +7,11 @@
 extern "C" {
 #endif
 
-int remk_platform_getaddrinfo(const char *hostname,
-    const char *servname, const struct addrinfo *hints,
-    struct addrinfo **res) REMK_PLATFORM_NOEXCEPT;
+int remk_platform_getaddrinfo(const char *hostname, const char *servname,
+                              const struct addrinfo *hints,
+                              struct addrinfo **res) REMK_PLATFORM_NOEXCEPT;
 
-void remk_platform_freeaddrinfo(
-    struct addrinfo *aip) REMK_PLATFORM_NOEXCEPT;
+void remk_platform_freeaddrinfo(struct addrinfo *aip) REMK_PLATFORM_NOEXCEPT;
 
 #ifdef __cplusplus
 }
