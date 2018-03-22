@@ -9,6 +9,9 @@ set(REMK_PLATFORM_ABI_PATCH 1)
 set(REMK_PLATFORM_ABI ${REMK_PLATFORM_ABI_MAJOR}.${REMK_PLATFORM_ABI_MINOR}.${REMK_PLATFORM_ABI_PATCH})
 if(UNIX)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror")
+  if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wmissing-prototypes")
+  endif()
 endif()
 add_library(
   remk_platform
