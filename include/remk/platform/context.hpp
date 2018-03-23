@@ -29,13 +29,29 @@ public:
   int connect(remk_platform_socket_t handle, const sockaddr *saddr,
               remk_platform_socklen_t len) noexcept;
 
+#ifdef _WIN32
+  virtual int system_recv(SOCKET handle, char *buffer, int count,
+                          int flags) noexcept;
+#else
+  virtual ssize_t system_recv(int handle, void *buffer, size_t count,
+                              int flags) noexcept;
+#endif
+
   virtual remk_platform_ssize_t recv(remk_platform_socket_t handle,
-                                     remk_platform_buffer_type_t *buffer,
+                                     void *buffer,
                                      remk_platform_size_t count,
                                      int flags) noexcept;
 
+#ifdef _WIN32
+  virtual int system_send(SOCKET handle, const char *buffer, int count,
+                          int flags) noexcept;
+#else
+  virtual ssize_t system_send(int handle, const void *buffer, size_t count,
+                              int flags) noexcept;
+#endif
+
   virtual remk_platform_ssize_t send(remk_platform_socket_t handle,
-                                     const remk_platform_buffer_type_t *buffer,
+                                     const void *buffer,
                                      remk_platform_size_t count,
                                      int flags) noexcept;
 

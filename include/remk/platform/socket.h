@@ -15,12 +15,12 @@ int remk_platform_connect(remk_platform_socket_t handle,
                           remk_platform_socklen_t len) REMK_PLATFORM_NOEXCEPT;
 
 remk_platform_ssize_t remk_platform_recv(remk_platform_socket_t handle,
-                                         remk_platform_buffer_type_t *buffer,
+                                         void *buffer,
                                          remk_platform_size_t count,
                                          int flags) REMK_PLATFORM_NOEXCEPT;
 
 remk_platform_ssize_t remk_platform_send(
-    remk_platform_socket_t handle, const remk_platform_buffer_type_t *buffer,
+    remk_platform_socket_t handle, const void *buffer,
     remk_platform_size_t count, int flags) REMK_PLATFORM_NOEXCEPT;
 
 int remk_platform_closesocket(remk_platform_socket_t handle)

@@ -14,7 +14,7 @@ int remk_platform_connect(remk_platform_socket_t handle, const sockaddr *saddr,
 }
 
 remk_platform_ssize_t remk_platform_recv(remk_platform_socket_t handle,
-                                         remk_platform_buffer_type_t *buffer,
+                                         void *buffer,
                                          remk_platform_size_t count,
                                          int flags) noexcept {
   return Context::get_thread_local()->recv(handle, buffer, count, flags);
@@ -22,7 +22,7 @@ remk_platform_ssize_t remk_platform_recv(remk_platform_socket_t handle,
 
 remk_platform_ssize_t
 remk_platform_send(remk_platform_socket_t handle,
-                   const remk_platform_buffer_type_t *buffer,
+                   const void *buffer,
                    remk_platform_size_t count, int flags) noexcept {
   return Context::get_thread_local()->send(handle, buffer, count, flags);
 }

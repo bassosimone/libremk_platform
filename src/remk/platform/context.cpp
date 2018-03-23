@@ -1,5 +1,7 @@
 #include <remk/platform/context.hpp>
 
+#include <limits.h>
+
 namespace remk {
 namespace platform {
 
@@ -68,18 +70,60 @@ int Context::connect(remk_platform_socket_t handle, const sockaddr *saddr,
   return ::connect(handle, saddr, salen);
 }
 
-remk_platform_ssize_t Context::recv(remk_platform_socket_t handle,
-                                    remk_platform_buffer_type_t *buffer,
-                                    remk_platform_size_t count,
-                                    int flags) noexcept {
+#ifdef _WIN32
+int Context::system_recv(SOCKET handle, char *buffer, int count,
+                         int flags) noexcept {
   return ::recv(handle, buffer, count, flags);
 }
+#else
+ssize_t Context::system_recv(int handle, void *buffer, size_t count,
+                             int flags) noexcept {
+  return ::recv(handle, buffer, count, flags);
+}
+#endif
 
-remk_platform_ssize_t Context::send(remk_platform_socket_t handle,
-                                    const remk_platform_buffer_type_t *buffer,
+remk_platform_ssize_t Context::recv(remk_platform_socket_t handle,
+                                    void *buffer,
                                     remk_platform_size_t count,
                                     int flags) noexcept {
+#ifdef _WIN32
+  if (count > INT_MAX) {
+    WSASetLastError(WSAEINVAL);
+    return -1;
+  }
+  return (remk_platform_ssize_t)system_recv(handle, (char *)buffer,
+                                            (int)count, flags);
+#else
+  return system_recv(handle, buffer, count, flags);
+#endif
+}
+
+#ifdef _WIN32
+int Context::system_send(SOCKET handle, const char *buffer, int count,
+                         int flags) noexcept {
   return ::send(handle, buffer, count, flags);
+}
+#else
+ssize_t Context::system_send(int handle, const void *buffer, size_t count,
+                             int flags) noexcept {
+  return ::send(handle, buffer, count, flags);
+}
+#endif
+
+remk_platform_ssize_t Context::send(remk_platform_socket_t handle,
+                                    const void *buffer,
+                                    remk_platform_size_t count,
+                                    int flags) noexcept {
+#ifdef _WIN32
+  if (count > INT_MAX) {
+    WSASetLastError(WSAEINVAL);
+    return -1;
+  }
+  return (remk_platform_ssize_t)system_send(handle, (const char *)buffer,
+                                            (int)count, flags);
+#else
+  return system_send(handle, buffer, count, flags);
+#endif
 }
 
 int Context::closesocket(remk_platform_socket_t handle) noexcept {
