@@ -75,58 +75,63 @@ int Context::connect(remk_platform_socket_t handle, const sockaddr *saddr,
 }
 
 #ifdef _WIN32
-int Context::system_recv(SOCKET handle, char *buffer, int count,
-                         int flags) noexcept {
-  return ::recv(handle, buffer, count, flags);
+int Context::system_recvfrom(SOCKET handle, char *buffer, int count,
+                         int flags, sockaddr *sa, int *len) noexcept {
+  return ::recvfrom(handle, buffer, count, flags, sa, len);
 }
 #else
-ssize_t Context::system_recv(int handle, void *buffer, size_t count,
-                             int flags) noexcept {
-  return ::recv(handle, buffer, count, flags);
+ssize_t Context::system_recvfrom(int handle, void *buffer, size_t count,
+                             int flags, sockaddr *sa, socklen_t *len) noexcept {
+  return ::recvfrom(handle, buffer, count, flags, sa, len);
 }
 #endif
 
-remk_platform_ssize_t Context::recv(remk_platform_socket_t handle,
+remk_platform_ssize_t Context::recvfrom(remk_platform_socket_t handle,
                                     void *buffer,
                                     remk_platform_size_t count,
-                                    int flags) noexcept {
+                                    int flags,
+                                    sockaddr *sa,
+                                    remk_platform_socklen_t *len) noexcept {
 #ifdef _WIN32
   if (count > INT_MAX) {
     WSASetLastError(WSAEINVAL);
     return -1;
   }
-  return (remk_platform_ssize_t)system_recv(handle, (char *)buffer,
-                                            (int)count, flags);
+  return (remk_platform_ssize_t)system_recvfrom(handle, (char *)buffer,
+                                            (int)count, flags, sa, len);
 #else
-  return system_recv(handle, buffer, count, flags);
+  return system_recvfrom(handle, buffer, count, flags, sa, len);
 #endif
 }
 
 #ifdef _WIN32
-int Context::system_send(SOCKET handle, const char *buffer, int count,
-                         int flags) noexcept {
-  return ::send(handle, buffer, count, flags);
+int Context::system_sendto(SOCKET handle, const char *buffer, int count,
+                         int flags, const sockaddr *sa, int len) noexcept {
+  return ::sendto(handle, buffer, count, flags, sa, len);
 }
 #else
-ssize_t Context::system_send(int handle, const void *buffer, size_t count,
-                             int flags) noexcept {
-  return ::send(handle, buffer, count, flags);
+ssize_t Context::system_sendto(int handle, const void *buffer, size_t count,
+                             int flags, const sockaddr *sa, socklen_t len)
+                             noexcept {
+  return ::sendto(handle, buffer, count, flags, sa, len);
 }
 #endif
 
-remk_platform_ssize_t Context::send(remk_platform_socket_t handle,
+remk_platform_ssize_t Context::sendto(remk_platform_socket_t handle,
                                     const void *buffer,
                                     remk_platform_size_t count,
-                                    int flags) noexcept {
+                                    int flags,
+                                    const sockaddr *sa,
+                                    remk_platform_socklen_t len) noexcept {
 #ifdef _WIN32
   if (count > INT_MAX) {
     WSASetLastError(WSAEINVAL);
     return -1;
   }
-  return (remk_platform_ssize_t)system_send(handle, (const char *)buffer,
-                                            (int)count, flags);
+  return (remk_platform_ssize_t)system_sendto(handle, (const char *)buffer,
+                                            (int)count, flags, sa, len);
 #else
-  return system_send(handle, buffer, count, flags);
+  return system_sendto(handle, buffer, count, flags, sa, len);
 #endif
 }
 

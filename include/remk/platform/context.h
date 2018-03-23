@@ -31,30 +31,36 @@ public:
                       remk_platform_socklen_t len) noexcept;
 
 #ifdef _WIN32
-  virtual int system_recv(SOCKET handle, char *buffer, int count,
-                          int flags) noexcept;
+  virtual int system_recvfrom(SOCKET handle, char *buffer, int count,
+                          int flags, sockaddr *addr, int *len) noexcept;
 #else
-  virtual ssize_t system_recv(int handle, void *buffer, size_t count,
-                              int flags) noexcept;
+  virtual ssize_t system_recvfrom(int handle, void *buffer, size_t count,
+                              int flags, sockaddr *addr, socklen_t *len)
+                                  noexcept;
 #endif
 
-  virtual remk_platform_ssize_t recv(remk_platform_socket_t handle,
+  virtual remk_platform_ssize_t recvfrom(remk_platform_socket_t handle,
                                      void *buffer,
                                      remk_platform_size_t count,
-                                     int flags) noexcept;
+                                     int flags,
+                                     sockaddr *addr,
+                                     remk_platform_socklen_t *len) noexcept;
 
 #ifdef _WIN32
-  virtual int system_send(SOCKET handle, const char *buffer, int count,
-                          int flags) noexcept;
+  virtual int system_sendto(SOCKET handle, const char *buffer, int count,
+                         int flags, const sockaddr *addr, int len) noexcept;
 #else
-  virtual ssize_t system_send(int handle, const void *buffer, size_t count,
-                              int flags) noexcept;
+  virtual ssize_t system_sendto(int handle, const void *buffer, size_t count,
+                             int flags, const sockaddr *addr, socklen_t len)
+                                noexcept;
 #endif
 
-  virtual remk_platform_ssize_t send(remk_platform_socket_t handle,
-                                     const void *buffer,
-                                     remk_platform_size_t count,
-                                     int flags) noexcept;
+  virtual remk_platform_ssize_t sendto(remk_platform_socket_t handle,
+                                    const void *buffer,
+                                    remk_platform_size_t count,
+                                    int flags,
+                                    const sockaddr *addr,
+                                    remk_platform_socklen_t len) noexcept;
 
   virtual int closesocket(remk_platform_socket_t handle) noexcept;
 
