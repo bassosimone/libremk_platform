@@ -18,16 +18,16 @@ double remk_platform_now(void) REMK_PLATFORM_NOEXCEPT;
 int remk_platform_setnonblocking(
       remk_platform_socket_t sock, int enable) REMK_PLATFORM_NOEXCEPT;
 
-int remk_platform_sockaddr_pton(const char *address, const char *port,
-      sockaddr_storage *sst) noexcept;
+int remk_platform_sockaddr_pton(
+      const char *address, const char *port, sockaddr_storage *sst) noexcept;
 
 #ifdef __cplusplus
 }
 #endif
 
 #ifdef __cplusplus
-int remk_platform_sockaddr_ntop(const sockaddr *sa, std::string *address,
-      std::string *port) noexcept;
+int remk_platform_sockaddr_ntop(
+      const sockaddr *sa, std::string *address, std::string *port) noexcept;
 
 std::string remk_platform_hexdump(const void *data, size_t count) noexcept;
 #endif

@@ -2,9 +2,9 @@
 #define INCLUDE_REMK_PLATFORM_AAA_BASE_H
 
 #ifdef _WIN32
+#include <basetsd.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
-#include <basetsd.h>
 #else
 #include <errno.h>
 #include <netdb.h>
