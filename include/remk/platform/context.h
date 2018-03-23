@@ -66,6 +66,16 @@ class Context {
     virtual int system_fcntl_int(int fd, int cmd, int arg) noexcept;
 #endif
 
+#ifdef _WIN32
+    virtual int system_wsasend(SOCKET s, LPWSABUF lpBuffers,
+          DWORD dwBufferCount, LPDWORD lpNumberOfBytesSent, DWORD dwFlags,
+          LPWSAOVERLAPPED lpOverlapped,
+          LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine) noexcept;
+#else
+    virtual ssize_t system_writev(
+          int fd, const struct iovec *iov, int iovcnt) noexcept;
+#endif
+
     virtual ~Context() noexcept;
 };
 

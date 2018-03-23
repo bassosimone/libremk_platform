@@ -24,6 +24,7 @@ add_library(
   include/remk/platform/socket.h
   include/remk/platform/sugar.h
   include/remk/platform/time.h
+  include/remk/platform/uio.h
   src/context.cpp
   src/errno.cpp
   src/netdb.cpp
@@ -31,6 +32,7 @@ add_library(
   src/socket.cpp
   src/sugar.cpp
   src/time.cpp
+  src/uio.cpp
 )
 target_include_directories(
   remk_platform

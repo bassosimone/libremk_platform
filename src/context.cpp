@@ -154,5 +154,19 @@ int Context::system_fcntl_int(int fd, int cmd, int arg) noexcept {
 }
 #endif
 
+#ifdef _WIN32
+int Context::system_wsasend(SOCKET s, LPWSABUF lpBuffers, DWORD dwBufferCount,
+      LPDWORD lpNumberOfBytesSent, DWORD dwFlags, LPWSAOVERLAPPED lpOverlapped,
+      LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine) noexcept {
+    return ::WSASend(s, lpBuffers, dwBufferCount, lpNumberOfBytesSent, dwFlags,
+          lpOverlapped, lpCompletionRoutine);
+}
+#else
+ssize_t Context::system_writev(
+      int fd, const struct iovec *iov, int iovcnt) noexcept {
+    return ::writev(fd, iov, iovcnt);
+}
+#endif
+
 } // namespace platform
 } // namespace remk
