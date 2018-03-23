@@ -1,5 +1,9 @@
 #include <remk/platform/context.h>
 
+#ifndef _WIN32
+#include <fcntl.h>
+#endif
+
 #include <limits.h>
 
 namespace remk {
@@ -140,6 +144,17 @@ int Context::select(int maxfd, fd_set *readset, fd_set *writeset,
 }
 
 Context::~Context() noexcept {}
+
+#ifdef _WIN32
+int Context::system_ioctlsocket(
+      SOCKET s, long cmd, unsigned long *argp) noexcept {
+  return ::ioctlsocket(s, cmd, argp);
+}
+#else
+int Context::system_fcntl_int(int fd, int cmd, int arg) noexcept {
+  return ::fcntl(fd, cmd, arg);
+}
+#endif
 
 } // namespace platform
 } // namespace remk

@@ -11,6 +11,9 @@ extern "C" {
 
 double remk_platform_now(void) REMK_PLATFORM_NOEXCEPT;
 
+int remk_platform_setnonblocking(
+      remk_platform_socket_t sock, int enable) REMK_PLATFORM_NOEXCEPT;
+
 #ifdef __cplusplus
 }
 #endif

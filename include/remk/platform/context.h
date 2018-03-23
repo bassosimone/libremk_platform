@@ -61,6 +61,13 @@ public:
   virtual int select(int maxfd, fd_set *readset, fd_set *writeset,
                      fd_set *exceptset, timeval *timeout) noexcept;
 
+#ifdef _WIN32
+  virtual int system_ioctlsocket(
+      SOCKET s, long cmd, unsigned long *argp) noexcept;
+#else
+  virtual int system_fcntl_int(int fd, int cmd, int arg) noexcept;
+#endif
+
   virtual ~Context() noexcept;
 };
 
