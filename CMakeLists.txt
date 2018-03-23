@@ -23,12 +23,12 @@ add_library(
   include/remk/platform/select.h
   include/remk/platform/socket.h
   include/remk/platform/time.h
-  src/remk/platform/context.cpp
-  src/remk/platform/errno.cpp
-  src/remk/platform/netdb.cpp
-  src/remk/platform/select.cpp
-  src/remk/platform/socket.cpp
-  src/remk/platform/time.cpp
+  src/context.cpp
+  src/errno.cpp
+  src/netdb.cpp
+  src/select.cpp
+  src/socket.cpp
+  src/time.cpp
 )
 target_include_directories(
   remk_platform
