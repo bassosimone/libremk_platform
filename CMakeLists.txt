@@ -22,12 +22,14 @@ add_library(
   include/remk/platform/platform.h
   include/remk/platform/select.h
   include/remk/platform/socket.h
+  include/remk/platform/sugar.h
   include/remk/platform/time.h
   src/context.cpp
   src/errno.cpp
   src/netdb.cpp
   src/select.cpp
   src/socket.cpp
+  src/sugar.cpp
   src/time.cpp
 )
 target_include_directories(
