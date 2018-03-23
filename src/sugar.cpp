@@ -1,11 +1,15 @@
 #include <remk/platform/sugar.h>
 
-#include <remk/platform/context.h>
-#include <remk/platform/time.h>
-
 #ifndef _WIN32
 #include <fcntl.h>
 #endif
+
+#include <assert.h>
+#include <string.h>
+
+#include <remk/platform/context.h>
+#include <remk/platform/errno.h>
+#include <remk/platform/time.h>
 
 double remk_platform_now() noexcept {
   timespec ts{};
@@ -38,5 +42,54 @@ int remk_platform_setnonblocking(
     return -1;
   }
 #endif
+  return 0;
+}
+
+int remk_platform_sockaddr_ntop(const sockaddr *sa, std::string *address,
+      std::string *port) noexcept {
+  if (sa == nullptr || address == nullptr || port == nullptr) {
+    remk_platform_set_last_error(REMK_PLATFORM_ERROR_NAME(INVAL));
+    return -1;
+  }
+  remk_platform_socklen_t len = 0;
+  switch (sa->sa_family) {
+  case AF_INET:
+    len = sizeof (sockaddr_in);
+    break;
+  case AF_INET6:
+    len = sizeof (sockaddr_in6);
+    break;
+  default:
+    remk_platform_set_last_error(REMK_PLATFORM_ERROR_NAME(INVAL));
+    return -1;
+  }
+  int flags = NI_NUMERICHOST | NI_NUMERICSERV;
+  char a[NI_MAXHOST], p[NI_MAXSERV];
+  if (::getnameinfo(sa, len, a, sizeof (a), p, sizeof (p), flags) != 0) {
+    remk_platform_set_last_error(REMK_PLATFORM_ERROR_NAME(INVAL));
+    return -1;
+  }
+  *address = a;
+  *port = p;
+  return 0;
+}
+
+int remk_platform_sockaddr_pton(const char *address, const char *port,
+      sockaddr_storage *sst) noexcept {
+  if (address == nullptr || port == nullptr || sst == nullptr) {
+    remk_platform_set_last_error(REMK_PLATFORM_ERROR_NAME(INVAL));
+    return -1;
+  }
+  memset(sst, 0, sizeof (*sst));
+  addrinfo *rp = nullptr;
+  addrinfo hints{};
+  hints.ai_flags |= AI_NUMERICHOST | AI_NUMERICSERV;
+  if (::getaddrinfo(address, port, &hints, &rp) != 0) {
+    remk_platform_set_last_error(REMK_PLATFORM_ERROR_NAME(INVAL));
+    return -1;
+  }
+  assert(rp != nullptr && rp->ai_addr && rp->ai_addrlen == sizeof (*sst));
+  memcpy(sst, rp->ai_addr, rp->ai_addrlen);
+  ::freeaddrinfo(rp);
   return 0;
 }
