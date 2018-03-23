@@ -7,6 +7,9 @@
 #include <assert.h>
 #include <string.h>
 
+#include <iomanip>
+#include <sstream>
+
 #include <remk/platform/context.h>
 #include <remk/platform/errno.h>
 #include <remk/platform/time.h>
@@ -92,4 +95,19 @@ int remk_platform_sockaddr_pton(const char *address, const char *port,
   memcpy(sst, rp->ai_addr, rp->ai_addrlen);
   ::freeaddrinfo(rp);
   return 0;
+}
+
+std::string remk_platform_hexdump(const void *data, size_t count) noexcept {
+  std::stringstream ss;
+  if (data != nullptr) {
+    const unsigned char *cbase = (const unsigned char *)data;
+    for (size_t i = 0; i < count; ++i) {
+      ss << std::hex << std::setfill('0') << std::setw(2)
+         << (unsigned int)cbase[i];
+      if (i < count - 1) { // safe b/c min(count) == 1 in this loop
+        ss << " ";
+      }
+    }
+  }
+  return ss.str();
 }
