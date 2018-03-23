@@ -1,5 +1,6 @@
-#ifndef REMK_PLATFORM_CONTEXT_HPP
-#define REMK_PLATFORM_CONTEXT_HPP
+#ifndef REMK_PLATFORM_CONTEXT_H
+#define REMK_PLATFORM_CONTEXT_H
+#ifdef __cplusplus
 
 #include <remk/platform/aaa_base.h>
 
@@ -65,4 +66,5 @@ public:
 
 } // namespace platform
 } // namespace remk
+#endif
 #endif

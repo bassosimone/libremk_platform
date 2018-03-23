@@ -1,5 +1,5 @@
-#ifndef REMK_PLATFORM_SELECT_HPP
-#define REMK_PLATFORM_SELECT_HPP
+#ifndef REMK_PLATFORM_SELECT_H
+#define REMK_PLATFORM_SELECT_H
 
 #include <remk/platform/aaa_base.h>
 

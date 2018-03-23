@@ -1,5 +1,5 @@
-#ifndef REMK_PLATFORM_NETDB_HPP
-#define REMK_PLATFORM_NETDB_HPP
+#ifndef REMK_PLATFORM_NETDB_H
+#define REMK_PLATFORM_NETDB_H
 
 #include <remk/platform/aaa_base.h>
 

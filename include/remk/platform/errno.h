@@ -1,5 +1,5 @@
-#ifndef REMK_PLATFORM_ERRNO_HPP
-#define REMK_PLATFORM_ERRNO_HPP
+#ifndef REMK_PLATFORM_ERRNO_H
+#define REMK_PLATFORM_ERRNO_H
 
 #include <remk/platform/aaa_base.h>
 

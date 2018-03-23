@@ -16,10 +16,10 @@ endif()
 add_library(
   remk_platform
   include/remk/platform/aaa_base.h
-  include/remk/platform/context.hpp
+  include/remk/platform/context.h
   include/remk/platform/errno.h
   include/remk/platform/netdb.h
-  include/remk/platform/platform.hpp
+  include/remk/platform/platform.h
   include/remk/platform/select.h
   include/remk/platform/socket.h
   include/remk/platform/time.h
