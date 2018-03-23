@@ -26,8 +26,8 @@ public:
   virtual remk_platform_socket_t socket(int domain, int type,
                                         int protocol) noexcept;
 
-  int connect(remk_platform_socket_t handle, const sockaddr *saddr,
-              remk_platform_socklen_t len) noexcept;
+  virtual int connect(remk_platform_socket_t handle, const sockaddr *saddr,
+                      remk_platform_socklen_t len) noexcept;
 
 #ifdef _WIN32
   virtual int system_recv(SOCKET handle, char *buffer, int count,
