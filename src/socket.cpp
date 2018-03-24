@@ -3,6 +3,17 @@
 
 using namespace remk::platform;
 
+int remk_platform_wsainit() noexcept {
+#ifdef _WIN32
+    WORD version = MAKEWORD(2, 2);
+    WSADATA wsadata;
+    if (WSAStartup(version, &wsadata) != 0) {
+        return -1;
+    }
+#endif
+    return 0;
+}
+
 remk_platform_socket_t remk_platform_socket(
       int domain, int type, int protocol) noexcept {
     return Context::get_thread_local()->socket(domain, type, protocol);

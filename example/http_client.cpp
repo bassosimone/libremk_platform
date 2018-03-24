@@ -6,16 +6,11 @@
 #include <string>
 
 int main() {
-#ifdef _WIN32
-    {
-        WORD version = MAKEWORD(2, 2);
-        WSADATA wsadata;
-        if (WSAStartup(version, &wsadata) != 0) {
-            std::clog << "WSAStartup: failed\n";
-            exit(EXIT_FAILURE);
-        }
+    if (remk_platform_wsainit() != 0) {
+        std::clog << "wsainit (errno): "
+                  << remk_platform_get_last_error() << "\n";
+        exit(EXIT_FAILURE);
     }
-#endif
     addrinfo hints{};
     hints.ai_flags |= AI_NUMERICSERV;
     hints.ai_socktype = SOCK_STREAM;

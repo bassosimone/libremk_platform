@@ -7,6 +7,10 @@
 extern "C" {
 #endif
 
+/* Initializes Windows sockets. Is a no-op on Unix. Must be called
+   from the main application, not from a DLL. */
+int remk_platform_wsainit(void) REMK_PLATFORM_NOEXCEPT;
+
 remk_platform_socket_t remk_platform_socket(
       int domain, int type, int protocol) REMK_PLATFORM_NOEXCEPT;
 
