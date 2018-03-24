@@ -4,10 +4,30 @@
 
 #include <remk/platform/aaa_base.h>
 
+#include <sstream>
+
+#define REMK_PLATFORM_LOG_WARNING 0
+#define REMK_PLATFORM_LOG_INFO 1
+#define REMK_PLATFORM_LOG_DEBUG 2
+
 namespace remk {
 namespace platform {
 
-class Context {
+class LoggerMixin {
+  public:
+    virtual void emit_log(int level, const std::stringstream &ss) noexcept;
+
+    int get_log_level() noexcept { return level_; }
+
+    void set_log_level(int level) noexcept { level_ = level; }
+
+    virtual ~LoggerMixin() noexcept;
+
+  private:
+    int level_ = REMK_PLATFORM_LOG_DEBUG;
+};
+
+class Context : public LoggerMixin {
   public:
     static void set_thread_local(Context *ctx) noexcept;
 
@@ -82,4 +102,36 @@ class Context {
 } // namespace platform
 } // namespace remk
 #endif
+
+#define REMK_PLATFORM_EMIT_LOG_(level_, statements_, print_last_error_)        \
+    do {                                                                       \
+        auto ctx = remk::platform::Context::get_thread_local();                \
+        if (level_ <= ctx->get_log_level()) {                                  \
+            std::stringstream ss;                                              \
+            ss << statements_;                                                 \
+            if (print_last_error_) {                                           \
+                ss << ": " << ctx->get_last_error();                           \
+            }                                                                  \
+            ctx->emit_log(level_, ss);                                         \
+        }                                                                      \
+    } while (0)
+
+#define REMK_PLATFORM_WARN(statements_)                                        \
+    REMK_PLATFORM_EMIT_LOG_(REMK_PLATFORM_LOG_WARNING, statements_, true)
+
+#define REMK_PLATFORM_WARNX(statements_)                                       \
+    REMK_PLATFORM_EMIT_LOG_(REMK_PLATFORM_LOG_WARNING, statements_, false)
+
+#define REMK_PLATFORM_INFO(statements_)                                        \
+    REMK_PLATFORM_EMIT_LOG_(REMK_PLATFORM_LOG_INFO, statements_, true)
+
+#define REMK_PLATFORM_INFOX(statements_)                                       \
+    REMK_PLATFORM_EMIT_LOG_(REMK_PLATFORM_LOG_INFO, statements_, false)
+
+#define REMK_PLATFORM_DEBUG(statements_)                                       \
+    REMK_PLATFORM_EMIT_LOG_(REMK_PLATFORM_LOG_DEBUG, statements_, true)
+
+#define REMK_PLATFORM_DEBUGX(statements_)                                      \
+    REMK_PLATFORM_EMIT_LOG_(REMK_PLATFORM_LOG_DEBUG, statements_, false)
+
 #endif

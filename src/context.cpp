@@ -6,8 +6,29 @@
 
 #include <limits.h>
 
+#include <iostream>
+
 namespace remk {
 namespace platform {
+
+void LoggerMixin::emit_log(int level, const std::stringstream &ss) noexcept {
+    switch (level) {
+    case REMK_PLATFORM_LOG_WARNING:
+        std::clog << "[!] ";
+        break;
+    case REMK_PLATFORM_LOG_INFO:
+        break;
+    case REMK_PLATFORM_LOG_DEBUG:
+        std::clog << "[D] ";
+        break;
+    default:
+        std::clog << "[?] ";
+        break;
+    }
+    std::clog << ss.str() << std::endl;
+}
+
+LoggerMixin::~LoggerMixin() noexcept {}
 
 // TODO(bassosimone): make sure this works on iOS armv7s. For reference
 // see https://github.com/measurement-kit/measurement-kit/issues/1319.
