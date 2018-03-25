@@ -79,6 +79,7 @@ class Context : public LoggerMixin {
     virtual int select(int maxfd, fd_set *readset, fd_set *writeset,
           fd_set *exceptset, timeval *timeout) noexcept;
 
+    // Currently not available through a C API because there's no need
 #ifdef _WIN32
     virtual int system_ioctlsocket(
           SOCKET s, long cmd, unsigned long *argp) noexcept;
@@ -86,6 +87,7 @@ class Context : public LoggerMixin {
     virtual int system_fcntl_int(int fd, int cmd, int arg) noexcept;
 #endif
 
+    // Currently not available through a C API because there's no need
 #ifdef _WIN32
     virtual int system_wsasend(SOCKET s, LPWSABUF lpBuffers,
           DWORD dwBufferCount, LPDWORD lpNumberOfBytesSent, DWORD dwFlags,
