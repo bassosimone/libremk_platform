@@ -18,8 +18,8 @@ double remk_platform_now(void) REMK_PLATFORM_NOEXCEPT;
 int remk_platform_setnonblocking(
       remk_platform_socket_t sock, int enable) REMK_PLATFORM_NOEXCEPT;
 
-int remk_platform_sockaddr_pton(
-      const char *address, const char *port, sockaddr_storage *sst) noexcept;
+int remk_platform_sockaddr_pton(const char *address, const char *port,
+      sockaddr_storage *sst) REMK_PLATFORM_NOEXCEPT;
 
 #ifdef __cplusplus
 }

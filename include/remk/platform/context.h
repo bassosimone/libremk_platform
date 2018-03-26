@@ -5,6 +5,7 @@
 #include <remk/platform/aaa_base.h>
 
 #include <sstream>
+#include <string>
 
 #define REMK_PLATFORM_LOG_WARNING 0
 #define REMK_PLATFORM_LOG_INFO 1
@@ -102,6 +103,18 @@ class Context : public LoggerMixin, public SystemMixin {
     static void set_thread_local(Context *ctx) noexcept;
 
     static Context *get_thread_local() noexcept;
+
+    virtual double now() noexcept;
+
+    virtual int setnonblocking(Socket handle, bool enable) noexcept;
+
+    virtual int sockaddr_pton(const char *address, const char *port,
+          sockaddr_storage *sst) noexcept;
+
+    virtual int sockaddr_ntop(
+          const sockaddr *sa, std::string *address, std::string *port) noexcept;
+
+    virtual std::string hexdump(const void *data, size_t count) noexcept;
 
     virtual ~Context() noexcept;
 };

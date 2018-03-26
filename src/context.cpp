@@ -4,9 +4,15 @@
 #include <fcntl.h>
 #endif
 
+#include <assert.h>
 #include <limits.h>
+#include <string.h>
 
+#include <iomanip>
 #include <iostream>
+#include <sstream>
+
+#include <remk/platform/errno.h>
 
 namespace remk {
 namespace platform {
@@ -187,6 +193,103 @@ ssize_t SystemMixin::system_writev(
     return ::writev(fd, iov, iovcnt);
 }
 #endif
+
+double Context::now() noexcept {
+    timespec ts{};
+    auto rv = this->timespec_get(&ts, TIME_UTC);
+    if (rv != TIME_UTC) {
+        return -1.0;
+    }
+    return (double)ts.tv_sec + (double)ts.tv_nsec / 1'000'000'000;
+}
+
+int Context::setnonblocking(Socket sock, bool enable) noexcept {
+#ifdef _WIN32
+    unsigned long ul_enable = enable;
+    if (this->system_ioctlsocket(sock, FIONBIO, &ul_enable) != 0) {
+        return -1;
+    }
+#else
+    auto flags = this->system_fcntl_int(sock, F_GETFL, 0);
+    if (flags < 0) {
+        return -1;
+    }
+    if (enable) {
+        flags |= O_NONBLOCK;
+    } else {
+        flags &= ~O_NONBLOCK;
+    }
+    if (this->system_fcntl_int(sock, F_SETFL, flags) != 0) {
+        return -1;
+    }
+#endif
+    return 0;
+}
+
+int Context::sockaddr_ntop(
+      const sockaddr *sa, std::string *address, std::string *port) noexcept {
+    if (sa == nullptr || address == nullptr || port == nullptr) {
+        this->set_last_error(REMK_PLATFORM_ERROR_NAME(INVAL));
+        return -1;
+    }
+    Socklen len = 0;
+    switch (sa->sa_family) {
+    case AF_INET:
+        len = sizeof(sockaddr_in);
+        break;
+    case AF_INET6:
+        len = sizeof(sockaddr_in6);
+        break;
+    default:
+        this->set_last_error(REMK_PLATFORM_ERROR_NAME(INVAL));
+        return -1;
+    }
+    int flags = NI_NUMERICHOST | NI_NUMERICSERV;
+    char a[NI_MAXHOST], p[NI_MAXSERV];
+    if (::getnameinfo(sa, len, a, sizeof(a), p, sizeof(p), flags) != 0) {
+        this->set_last_error(REMK_PLATFORM_ERROR_NAME(INVAL));
+        return -1;
+    }
+    *address = a;
+    *port = p;
+    return 0;
+}
+
+int Context::sockaddr_pton(
+      const char *address, const char *port, sockaddr_storage *sst) noexcept {
+    if (address == nullptr || port == nullptr || sst == nullptr) {
+        this->set_last_error(REMK_PLATFORM_ERROR_NAME(INVAL));
+        return -1;
+    }
+    memset(sst, 0, sizeof(*sst));
+    addrinfo *rp = nullptr;
+    addrinfo hints{};
+    hints.ai_flags |= AI_NUMERICHOST | AI_NUMERICSERV;
+    // Note: here I'm using ::getaddrinfo() and ::freeaddrinfo() intentionally
+    if (::getaddrinfo(address, port, &hints, &rp) != 0) {
+        this->set_last_error(REMK_PLATFORM_ERROR_NAME(INVAL));
+        return -1;
+    }
+    assert(rp != nullptr && rp->ai_addr && rp->ai_addrlen == sizeof(*sst));
+    memcpy(sst, rp->ai_addr, rp->ai_addrlen);
+    ::freeaddrinfo(rp);
+    return 0;
+}
+
+std::string Context::hexdump(const void *data, size_t count) noexcept {
+    std::stringstream ss;
+    if (data != nullptr) {
+        const unsigned char *cbase = (const unsigned char *)data;
+        for (size_t i = 0; i < count; ++i) {
+            ss << std::hex << std::setfill('0') << std::setw(2)
+               << (unsigned int)cbase[i];
+            if (i < count - 1) { // safe b/c min(count) == 1 in this loop
+                ss << " ";
+            }
+        }
+    }
+    return ss.str();
+}
 
 } // namespace platform
 } // namespace remk
