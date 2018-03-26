@@ -291,5 +291,16 @@ std::string Context::hexdump(const void *data, size_t count) noexcept {
     return ss.str();
 }
 
+int Context::wsainit() noexcept {
+#ifdef _WIN32
+    WORD version = MAKEWORD(2, 2);
+    WSADATA wsadata;
+    if (WSAStartup(version, &wsadata) != 0) {
+        return -1;
+    }
+#endif
+    return 0;
+}
+
 } // namespace platform
 } // namespace remk

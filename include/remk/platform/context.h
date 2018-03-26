@@ -116,6 +116,8 @@ class Context : public LoggerMixin, public SystemMixin {
 
     virtual std::string hexdump(const void *data, size_t count) noexcept;
 
+    virtual int wsainit() noexcept;
+
     virtual ~Context() noexcept;
 };
 
