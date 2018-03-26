@@ -45,11 +45,10 @@ class SystemMixin {
 
     virtual void freeaddrinfo(addrinfo *aip) noexcept;
 
-    virtual Socket socket(
-          int domain, int type, int protocol) noexcept;
+    virtual Socket socket(int domain, int type, int protocol) noexcept;
 
-    virtual int connect(Socket handle, const sockaddr *saddr,
-          Socklen len) noexcept;
+    virtual int connect(
+          Socket handle, const sockaddr *saddr, Socklen len) noexcept;
 
 #ifdef _WIN32
     virtual int system_recvfrom(SOCKET handle, char *buffer, int count,
@@ -59,9 +58,8 @@ class SystemMixin {
           int flags, sockaddr *addr, socklen_t *len) noexcept;
 #endif
 
-    virtual Ssize recvfrom(Socket handle,
-          void *buffer, Size count, int flags, sockaddr *addr,
-          Socklen *len) noexcept;
+    virtual Ssize recvfrom(Socket handle, void *buffer, Size count, int flags,
+          sockaddr *addr, Socklen *len) noexcept;
 
 #ifdef _WIN32
     virtual int system_sendto(SOCKET handle, const char *buffer, int count,
@@ -71,9 +69,8 @@ class SystemMixin {
           int flags, const sockaddr *addr, socklen_t len) noexcept;
 #endif
 
-    virtual Ssize sendto(Socket handle,
-          const void *buffer, Size count, int flags,
-          const sockaddr *addr, Socklen len) noexcept;
+    virtual Ssize sendto(Socket handle, const void *buffer, Size count,
+          int flags, const sockaddr *addr, Socklen len) noexcept;
 
     virtual int closesocket(Socket handle) noexcept;
 

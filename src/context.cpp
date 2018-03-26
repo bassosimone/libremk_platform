@@ -85,19 +85,18 @@ void SystemMixin::freeaddrinfo(addrinfo *aip) noexcept {
     return ::freeaddrinfo(aip);
 }
 
-Socket SystemMixin::socket(
-      int domain, int type, int protocol) noexcept {
+Socket SystemMixin::socket(int domain, int type, int protocol) noexcept {
     return ::socket(domain, type, protocol);
 }
 
-int SystemMixin::connect(Socket handle, const sockaddr *saddr,
-      Socklen salen) noexcept {
+int SystemMixin::connect(
+      Socket handle, const sockaddr *saddr, Socklen salen) noexcept {
     return ::connect(handle, saddr, salen);
 }
 
 #ifdef _WIN32
-int SystemMixin::system_recvfrom(SOCKET handle, char *buffer, int count, int flags,
-      sockaddr *sa, int *len) noexcept {
+int SystemMixin::system_recvfrom(SOCKET handle, char *buffer, int count,
+      int flags, sockaddr *sa, int *len) noexcept {
     return ::recvfrom(handle, buffer, count, flags, sa, len);
 }
 #else
@@ -107,9 +106,8 @@ ssize_t SystemMixin::system_recvfrom(int handle, void *buffer, size_t count,
 }
 #endif
 
-Ssize SystemMixin::recvfrom(Socket handle,
-      void *buffer, Size count, int flags, sockaddr *sa,
-      Socklen *len) noexcept {
+Ssize SystemMixin::recvfrom(Socket handle, void *buffer, Size count, int flags,
+      sockaddr *sa, Socklen *len) noexcept {
 #ifdef _WIN32
     if (count > INT_MAX) {
         WSASetLastError(WSAEINVAL);
@@ -134,9 +132,8 @@ ssize_t SystemMixin::system_sendto(int handle, const void *buffer, size_t count,
 }
 #endif
 
-Ssize SystemMixin::sendto(Socket handle,
-      const void *buffer, Size count, int flags,
-      const sockaddr *sa, Socklen len) noexcept {
+Ssize SystemMixin::sendto(Socket handle, const void *buffer, Size count,
+      int flags, const sockaddr *sa, Socklen len) noexcept {
 #ifdef _WIN32
     if (count > INT_MAX) {
         WSASetLastError(WSAEINVAL);
@@ -177,8 +174,9 @@ int SystemMixin::system_fcntl_int(int fd, int cmd, int arg) noexcept {
 #endif
 
 #ifdef _WIN32
-int SystemMixin::system_wsasend(SOCKET s, LPWSABUF lpBuffers, DWORD dwBufferCount,
-      LPDWORD lpNumberOfBytesSent, DWORD dwFlags, LPWSAOVERLAPPED lpOverlapped,
+int SystemMixin::system_wsasend(SOCKET s, LPWSABUF lpBuffers,
+      DWORD dwBufferCount, LPDWORD lpNumberOfBytesSent, DWORD dwFlags,
+      LPWSAOVERLAPPED lpOverlapped,
       LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine) noexcept {
     return ::WSASend(s, lpBuffers, dwBufferCount, lpNumberOfBytesSent, dwFlags,
           lpOverlapped, lpCompletionRoutine);
