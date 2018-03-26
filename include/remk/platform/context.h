@@ -13,6 +13,11 @@
 namespace remk {
 namespace platform {
 
+using Socket = remk_platform_socket_t;
+using Socklen = remk_platform_socklen_t;
+using Ssize = remk_platform_ssize_t;
+using Size = remk_platform_size_t;
+
 class LoggerMixin {
   public:
     virtual void emit_log(int level, const std::stringstream &ss) noexcept;
@@ -27,12 +32,8 @@ class LoggerMixin {
     int level_ = REMK_PLATFORM_LOG_DEBUG;
 };
 
-class Context : public LoggerMixin {
+class SystemMixin {
   public:
-    static void set_thread_local(Context *ctx) noexcept;
-
-    static Context *get_thread_local() noexcept;
-
     virtual int timespec_get(timespec *ts, int base) noexcept;
 
     virtual int get_last_error() noexcept;
@@ -44,11 +45,11 @@ class Context : public LoggerMixin {
 
     virtual void freeaddrinfo(addrinfo *aip) noexcept;
 
-    virtual remk_platform_socket_t socket(
+    virtual Socket socket(
           int domain, int type, int protocol) noexcept;
 
-    virtual int connect(remk_platform_socket_t handle, const sockaddr *saddr,
-          remk_platform_socklen_t len) noexcept;
+    virtual int connect(Socket handle, const sockaddr *saddr,
+          Socklen len) noexcept;
 
 #ifdef _WIN32
     virtual int system_recvfrom(SOCKET handle, char *buffer, int count,
@@ -58,9 +59,9 @@ class Context : public LoggerMixin {
           int flags, sockaddr *addr, socklen_t *len) noexcept;
 #endif
 
-    virtual remk_platform_ssize_t recvfrom(remk_platform_socket_t handle,
-          void *buffer, remk_platform_size_t count, int flags, sockaddr *addr,
-          remk_platform_socklen_t *len) noexcept;
+    virtual Ssize recvfrom(Socket handle,
+          void *buffer, Size count, int flags, sockaddr *addr,
+          Socklen *len) noexcept;
 
 #ifdef _WIN32
     virtual int system_sendto(SOCKET handle, const char *buffer, int count,
@@ -70,16 +71,15 @@ class Context : public LoggerMixin {
           int flags, const sockaddr *addr, socklen_t len) noexcept;
 #endif
 
-    virtual remk_platform_ssize_t sendto(remk_platform_socket_t handle,
-          const void *buffer, remk_platform_size_t count, int flags,
-          const sockaddr *addr, remk_platform_socklen_t len) noexcept;
+    virtual Ssize sendto(Socket handle,
+          const void *buffer, Size count, int flags,
+          const sockaddr *addr, Socklen len) noexcept;
 
-    virtual int closesocket(remk_platform_socket_t handle) noexcept;
+    virtual int closesocket(Socket handle) noexcept;
 
     virtual int select(int maxfd, fd_set *readset, fd_set *writeset,
           fd_set *exceptset, timeval *timeout) noexcept;
 
-    // Currently not available through a C API because there's no need
 #ifdef _WIN32
     virtual int system_ioctlsocket(
           SOCKET s, long cmd, unsigned long *argp) noexcept;
@@ -87,7 +87,6 @@ class Context : public LoggerMixin {
     virtual int system_fcntl_int(int fd, int cmd, int arg) noexcept;
 #endif
 
-    // Currently not available through a C API because there's no need
 #ifdef _WIN32
     virtual int system_wsasend(SOCKET s, LPWSABUF lpBuffers,
           DWORD dwBufferCount, LPDWORD lpNumberOfBytesSent, DWORD dwFlags,
@@ -97,6 +96,15 @@ class Context : public LoggerMixin {
     virtual ssize_t system_writev(
           int fd, const struct iovec *iov, int iovcnt) noexcept;
 #endif
+
+    virtual ~SystemMixin() noexcept;
+};
+
+class Context : public LoggerMixin, public SystemMixin {
+  public:
+    static void set_thread_local(Context *ctx) noexcept;
+
+    static Context *get_thread_local() noexcept;
 
     virtual ~Context() noexcept;
 };
