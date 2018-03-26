@@ -62,6 +62,9 @@ class SystemMixin {
     virtual Ssize recvfrom(Socket handle, void *buffer, Size count, int flags,
           sockaddr *addr, Socklen *len) noexcept;
 
+    virtual Ssize recv(
+          Socket handle, void *buffer, Size count, int flags) noexcept;
+
 #ifdef _WIN32
     virtual int system_sendto(SOCKET handle, const char *buffer, int count,
           int flags, const sockaddr *addr, int len) noexcept;
@@ -72,6 +75,9 @@ class SystemMixin {
 
     virtual Ssize sendto(Socket handle, const void *buffer, Size count,
           int flags, const sockaddr *addr, Socklen len) noexcept;
+
+    virtual Ssize send(
+          Socket handle, const void *buffer, Size count, int flags) noexcept;
 
     virtual int closesocket(Socket handle) noexcept;
 

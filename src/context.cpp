@@ -126,6 +126,11 @@ Ssize SystemMixin::recvfrom(Socket handle, void *buffer, Size count, int flags,
 #endif
 }
 
+Ssize SystemMixin::recv(
+      Socket handle, void *buffer, Size count, int flags) noexcept {
+    return this->recvfrom(handle, buffer, count, flags, nullptr, nullptr);
+}
+
 #ifdef _WIN32
 int SystemMixin::system_sendto(SOCKET handle, const char *buffer, int count,
       int flags, const sockaddr *sa, int len) noexcept {
@@ -150,6 +155,11 @@ Ssize SystemMixin::sendto(Socket handle, const void *buffer, Size count,
 #else
     return system_sendto(handle, buffer, count, flags, sa, len);
 #endif
+}
+
+Ssize SystemMixin::send(
+      Socket handle, const void *buffer, Size count, int flags) noexcept {
+    return this->sendto(handle, buffer, count, flags, nullptr, 0);
 }
 
 int SystemMixin::closesocket(Socket handle) noexcept {
