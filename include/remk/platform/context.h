@@ -131,35 +131,34 @@ class Context : public LoggerMixin, public SystemMixin {
 } // namespace remk
 #endif
 
-#define REMK_PLATFORM_EMIT_LOG_(level_, statements_, print_last_error_)        \
+#define REMK_PLATFORM_EMIT_LOG_(ctx_, level_, statements_, print_last_error_)  \
     do {                                                                       \
-        auto ctx = remk::platform::Context::get_thread_local();                \
-        if (level_ <= ctx->get_log_level()) {                                  \
+        if (level_ <= ctx_->get_log_level()) {                                 \
             std::stringstream ss;                                              \
             ss << statements_;                                                 \
             if (print_last_error_) {                                           \
-                ss << ": " << ctx->get_last_error();                           \
+                ss << ": " << ctx_->get_last_error();                          \
             }                                                                  \
-            ctx->emit_log(level_, ss);                                         \
+            ctx_->emit_log(level_, ss);                                        \
         }                                                                      \
     } while (0)
 
-#define REMK_PLATFORM_WARN(statements_)                                        \
-    REMK_PLATFORM_EMIT_LOG_(REMK_PLATFORM_LOG_WARNING, statements_, true)
+#define REMK_PLATFORM_WARN(ctx_, statements_)                                  \
+    REMK_PLATFORM_EMIT_LOG_(ctx_, REMK_PLATFORM_LOG_WARNING, statements_, true)
 
-#define REMK_PLATFORM_WARNX(statements_)                                       \
-    REMK_PLATFORM_EMIT_LOG_(REMK_PLATFORM_LOG_WARNING, statements_, false)
+#define REMK_PLATFORM_WARNX(ctx_, statements_)                                 \
+    REMK_PLATFORM_EMIT_LOG_(ctx_, REMK_PLATFORM_LOG_WARNING, statements_, false)
 
-#define REMK_PLATFORM_INFO(statements_)                                        \
-    REMK_PLATFORM_EMIT_LOG_(REMK_PLATFORM_LOG_INFO, statements_, true)
+#define REMK_PLATFORM_INFO(ctx_, statements_)                                  \
+    REMK_PLATFORM_EMIT_LOG_(ctx_, REMK_PLATFORM_LOG_INFO, statements_, true)
 
-#define REMK_PLATFORM_INFOX(statements_)                                       \
-    REMK_PLATFORM_EMIT_LOG_(REMK_PLATFORM_LOG_INFO, statements_, false)
+#define REMK_PLATFORM_INFOX(ctx_, statements_)                                 \
+    REMK_PLATFORM_EMIT_LOG_(ctx_, REMK_PLATFORM_LOG_INFO, statements_, false)
 
-#define REMK_PLATFORM_DEBUG(statements_)                                       \
-    REMK_PLATFORM_EMIT_LOG_(REMK_PLATFORM_LOG_DEBUG, statements_, true)
+#define REMK_PLATFORM_DEBUG(ctx_, statements_)                                 \
+    REMK_PLATFORM_EMIT_LOG_(ctx_, REMK_PLATFORM_LOG_DEBUG, statements_, true)
 
-#define REMK_PLATFORM_DEBUGX(statements_)                                      \
-    REMK_PLATFORM_EMIT_LOG_(REMK_PLATFORM_LOG_DEBUG, statements_, false)
+#define REMK_PLATFORM_DEBUGX(ctx_, statements_)                                \
+    REMK_PLATFORM_EMIT_LOG_(ctx_, REMK_PLATFORM_LOG_DEBUG, statements_, false)
 
 #endif
