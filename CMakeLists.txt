@@ -16,7 +16,6 @@ endif()
 add_library(
   remk_platform
   include/remk/platform.h
-  include/remk/platform/aaa_base.h
   include/remk/platform/context.h
   src/context.cpp
 )
