@@ -22,14 +22,6 @@
 #define TIME_UTC 1
 #endif
 
-#if defined __cplusplus && __cplusplus >= 201103L
-#define REMK_PLATFORM_NOEXCEPT noexcept
-#elif defined __cplusplus
-#define REMK_PLATFORM_NOEXCEPT throw()
-#else
-#define REMK_PLATFORM_NOEXCEPT /* Nothing */
-#endif
-
 #ifdef _WIN32
 typedef SOCKET remk_platform_socket_t;
 typedef SIZE_T remk_platform_size_t;
