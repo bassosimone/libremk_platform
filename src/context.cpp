@@ -37,17 +37,6 @@ void LoggerMixin::emit_log(int level, const std::stringstream &ss) noexcept {
 
 LoggerMixin::~LoggerMixin() noexcept {}
 
-// TODO(bassosimone): make sure this works on iOS armv7s. For reference
-// see https://github.com/measurement-kit/measurement-kit/issues/1319.
-static thread_local Context *pointer_ = nullptr;
-
-/*static*/ void Context::set_thread_local(Context *p) noexcept { pointer_ = p; }
-
-/*static*/ Context *Context::get_thread_local() noexcept {
-    static Context global_context_;
-    return (pointer_ != nullptr) ? pointer_ : &global_context_;
-}
-
 // TODO(bassosimone): see whether we can use a monotonic clock here.
 int SystemMixin::timespec_get(timespec *ts, int base) noexcept {
 #ifdef _WIN32

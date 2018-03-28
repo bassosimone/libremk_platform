@@ -111,10 +111,6 @@ class SystemMixin {
 
 class Context : public LoggerMixin, public SystemMixin {
   public:
-    static void set_thread_local(Context *ctx) noexcept;
-
-    static Context *get_thread_local() noexcept;
-
     virtual double now() noexcept;
 
     virtual int setnonblocking(Socket handle, bool enable) noexcept;
