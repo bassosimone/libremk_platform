@@ -10,6 +10,7 @@
 
 #include <iomanip>
 #include <iostream>
+#include <memory>
 #include <sstream>
 
 #include <remk/platform/errno.h>
@@ -203,6 +204,44 @@ ssize_t SystemMixin::system_writev(
     return ::writev(fd, iov, iovcnt);
 }
 #endif
+
+Ssize SystemMixin::writev(
+      Socket socket, const iovec *iov, int iovcnt) noexcept {
+#ifdef _WIN32
+    if (iov == nullptr || iovcnt < 0 || iovcnt > IOV_MAX) {
+        WSASetLastError(WSAEINVAL);
+        return -1;
+    }
+    // To simplify reasoning about the code below in both Win32 and Win64, we
+    // fail when requested to send more than `INT_MAX - 1` bytes.
+    constexpr SIZE_T max_size = INT_MAX - 1;
+    auto buffs = std::make_unique<WSABUF[]>(iovcnt);
+    {
+        auto iop = &iov[0];
+        auto bufp = buffs.get();
+        SIZE_T total = 0;
+        for (auto i = 0; i < iovcnt; ++i, ++iop, ++bufp) {
+            if (iop->iov_len > max_size || total > max_size - iop->iov_len) {
+                WSASetLastError(WSAEINVAL);
+                return -1;
+            }
+            total += iop->iov_len;
+            bufp->len = (unsigned long)iop->iov_len;
+            bufp->buf = (char *)iop->iov_base;
+        }
+        assert(total <= max_size);
+    }
+    DWORD nsent = 0;
+    if (this->system_wsasend(socket, buffs.get(), (DWORD)iovcnt, &nsent, 0,
+              nullptr, nullptr) != 0) {
+        return -1;
+    }
+    assert(nsent <= max_size);
+    return nsent;
+#else
+    return this->system_writev(socket, iov, iovcnt);
+#endif
+}
 
 double Context::now() noexcept {
     timespec ts{};
