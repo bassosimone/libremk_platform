@@ -305,7 +305,7 @@ int Context::sockaddr_pton(
         this->set_last_error(REMK_PLATFORM_ERROR_NAME(INVAL));
         return -1;
     }
-    assert(rp != nullptr && rp->ai_addr && rp->ai_addrlen == sizeof(*sst));
+    assert(rp != nullptr && rp->ai_addr && rp->ai_addrlen <= sizeof(*sst));
     memcpy(sst, rp->ai_addr, rp->ai_addrlen);
     ::freeaddrinfo(rp);
     return 0;
