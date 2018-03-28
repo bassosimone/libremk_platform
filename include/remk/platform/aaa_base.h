@@ -23,21 +23,9 @@
 #endif
 
 #ifdef _WIN32
-typedef SOCKET remk_platform_socket_t;
-typedef SIZE_T remk_platform_size_t;
-typedef int remk_platform_socklen_t;
-typedef SSIZE_T remk_platform_ssize_t;
-#else
-typedef int remk_platform_socket_t;
-typedef size_t remk_platform_size_t;
-typedef socklen_t remk_platform_socklen_t;
-typedef ssize_t remk_platform_ssize_t;
-#endif
-
-#ifdef _WIN32
 struct iovec {
     void *iov_base;
-    remk_platform_size_t iov_len;
+    SIZE_T iov_len;
 };
 #define IOV_MAX 64
 #endif

@@ -20,10 +20,17 @@
 namespace remk {
 namespace platform {
 
-using Socket = remk_platform_socket_t;
-using Socklen = remk_platform_socklen_t;
-using Ssize = remk_platform_ssize_t;
-using Size = remk_platform_size_t;
+#ifdef _WIN32
+using Socket = SOCKET;
+using Size = SIZE_T;
+using Socklen = int;
+using Ssize = SSIZE_T;
+#else
+using Socket = int;
+using Size = size_t;
+using Socklen = socklen_t;
+using Ssize = ssize_t;
+#endif
 
 class LoggerMixin {
   public:
