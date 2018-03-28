@@ -15,6 +15,7 @@ if(UNIX)
 endif()
 add_library(
   remk_platform
+  include/remk/platform.h
   include/remk/platform/aaa_base.h
   include/remk/platform/context.h
   include/remk/platform/errno.h
@@ -34,9 +35,9 @@ set_target_properties(
 )
 install(
   DIRECTORY
-  include/remk/platform
-  DESTINATION
   include/remk
+  DESTINATION
+  include
 )
 install(
   TARGETS
