@@ -13,8 +13,6 @@
 #include <memory>
 #include <sstream>
 
-#include <remk/platform/errno.h>
-
 namespace remk {
 namespace platform {
 
