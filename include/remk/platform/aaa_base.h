@@ -34,4 +34,12 @@ typedef socklen_t remk_platform_socklen_t;
 typedef ssize_t remk_platform_ssize_t;
 #endif
 
+#ifdef _WIN32
+struct iovec {
+    void *iov_base;
+    remk_platform_size_t iov_len;
+};
+#define IOV_MAX 64
+#endif
+
 #endif

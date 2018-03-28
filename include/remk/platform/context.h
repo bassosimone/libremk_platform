@@ -3,7 +3,6 @@
 #ifdef __cplusplus
 
 #include <remk/platform/aaa_base.h>
-#include <remk/platform/uio.h>
 
 #include <sstream>
 #include <string>

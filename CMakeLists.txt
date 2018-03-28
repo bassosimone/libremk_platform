@@ -18,7 +18,6 @@ add_library(
   include/remk/platform.h
   include/remk/platform/aaa_base.h
   include/remk/platform/context.h
-  include/remk/platform/uio.h
   src/context.cpp
 )
 target_include_directories(
