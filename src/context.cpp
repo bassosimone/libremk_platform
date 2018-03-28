@@ -165,9 +165,6 @@ int SystemMixin::select(int maxfd, fd_set *readset, fd_set *writeset,
     return ::select(maxfd, readset, writeset, exceptset, timeout);
 }
 
-SystemMixin::~SystemMixin() noexcept {}
-Context::~Context() noexcept {}
-
 #ifdef _WIN32
 int SystemMixin::system_ioctlsocket(
       SOCKET s, long cmd, unsigned long *argp) noexcept {
@@ -231,6 +228,8 @@ Ssize SystemMixin::writev(
     return this->system_writev(socket, iov, iovcnt);
 #endif
 }
+
+SystemMixin::~SystemMixin() noexcept {}
 
 double Context::now() noexcept {
     timespec ts{};
@@ -339,6 +338,8 @@ int Context::wsainit() noexcept {
 #endif
     return 0;
 }
+
+Context::~Context() noexcept {}
 
 } // namespace platform
 } // namespace remk
