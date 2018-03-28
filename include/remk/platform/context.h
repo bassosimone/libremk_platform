@@ -52,6 +52,8 @@ class SystemMixin {
     virtual int connect(
           Socket handle, const sockaddr *saddr, Socklen len) noexcept;
 
+    /* The following function has the same ABI of the corresponding system API,
+       instead remk_platform_recv() has a uniform ABI regardless of the OS. */
 #ifdef _WIN32
     virtual int system_recvfrom(SOCKET handle, char *buffer, int count,
           int flags, sockaddr *addr, int *len) noexcept;
@@ -125,6 +127,8 @@ class Context : public LoggerMixin, public SystemMixin {
 
     virtual std::string hexdump(const void *data, size_t count) noexcept;
 
+    /* Initializes Windows sockets. Is a no-op on Unix. Must be called
+       from the main application, not from a DLL. */
     virtual int wsainit() noexcept;
 
     virtual ~Context() noexcept;

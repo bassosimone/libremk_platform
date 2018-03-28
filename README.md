@@ -79,10 +79,3 @@ cmake -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=ON -DBUILD_SHARED_LIBS=ON ..
 ## Examples
 
 See `example/http_client.cpp`.
-
-## Deprecated code
-
-Initially, I wanted to emphasize the possibility of using a `thread_local`
-context pointer, to avoid carrying around an explicit pointer. Then, I
-figured out that was probably too much complex to debug. So, code for doing
-thar exists in this repository but will be removed.
