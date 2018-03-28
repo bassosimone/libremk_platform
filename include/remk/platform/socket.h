@@ -37,7 +37,7 @@ remk_platform_ssize_t remk_platform_recv(remk_platform_socket_t handle,
 int remk_platform_system_recvfrom(SOCKET handle, char *buffer, int count,
       int flags, struct sockaddr *sa, int *len) REMK_PLATFORM_NOEXCEPT;
 #else
-ssize_t remk_platform_recvfrom(int handle, void *buffer, size_t count,
+ssize_t remk_platform_system_recvfrom(int handle, void *buffer, size_t count,
       int flags, struct sockaddr *sa, socklen_t *len) REMK_PLATFORM_NOEXCEPT;
 #endif
 

@@ -3,8 +3,10 @@
 #ifdef __cplusplus
 
 #include <remk/platform/aaa_base.h>
+#include <remk/platform/uio.h>
 
 #include <sstream>
+#include <string>
 
 #define REMK_PLATFORM_LOG_WARNING 0
 #define REMK_PLATFORM_LOG_INFO 1
@@ -12,6 +14,11 @@
 
 namespace remk {
 namespace platform {
+
+using Socket = remk_platform_socket_t;
+using Socklen = remk_platform_socklen_t;
+using Ssize = remk_platform_ssize_t;
+using Size = remk_platform_size_t;
 
 class LoggerMixin {
   public:
@@ -27,12 +34,8 @@ class LoggerMixin {
     int level_ = REMK_PLATFORM_LOG_DEBUG;
 };
 
-class Context : public LoggerMixin {
+class SystemMixin {
   public:
-    static void set_thread_local(Context *ctx) noexcept;
-
-    static Context *get_thread_local() noexcept;
-
     virtual int timespec_get(timespec *ts, int base) noexcept;
 
     virtual int get_last_error() noexcept;
@@ -44,11 +47,10 @@ class Context : public LoggerMixin {
 
     virtual void freeaddrinfo(addrinfo *aip) noexcept;
 
-    virtual remk_platform_socket_t socket(
-          int domain, int type, int protocol) noexcept;
+    virtual Socket socket(int domain, int type, int protocol) noexcept;
 
-    virtual int connect(remk_platform_socket_t handle, const sockaddr *saddr,
-          remk_platform_socklen_t len) noexcept;
+    virtual int connect(
+          Socket handle, const sockaddr *saddr, Socklen len) noexcept;
 
 #ifdef _WIN32
     virtual int system_recvfrom(SOCKET handle, char *buffer, int count,
@@ -58,9 +60,11 @@ class Context : public LoggerMixin {
           int flags, sockaddr *addr, socklen_t *len) noexcept;
 #endif
 
-    virtual remk_platform_ssize_t recvfrom(remk_platform_socket_t handle,
-          void *buffer, remk_platform_size_t count, int flags, sockaddr *addr,
-          remk_platform_socklen_t *len) noexcept;
+    virtual Ssize recvfrom(Socket handle, void *buffer, Size count, int flags,
+          sockaddr *addr, Socklen *len) noexcept;
+
+    virtual Ssize recv(
+          Socket handle, void *buffer, Size count, int flags) noexcept;
 
 #ifdef _WIN32
     virtual int system_sendto(SOCKET handle, const char *buffer, int count,
@@ -70,16 +74,17 @@ class Context : public LoggerMixin {
           int flags, const sockaddr *addr, socklen_t len) noexcept;
 #endif
 
-    virtual remk_platform_ssize_t sendto(remk_platform_socket_t handle,
-          const void *buffer, remk_platform_size_t count, int flags,
-          const sockaddr *addr, remk_platform_socklen_t len) noexcept;
+    virtual Ssize sendto(Socket handle, const void *buffer, Size count,
+          int flags, const sockaddr *addr, Socklen len) noexcept;
 
-    virtual int closesocket(remk_platform_socket_t handle) noexcept;
+    virtual Ssize send(
+          Socket handle, const void *buffer, Size count, int flags) noexcept;
+
+    virtual int closesocket(Socket handle) noexcept;
 
     virtual int select(int maxfd, fd_set *readset, fd_set *writeset,
           fd_set *exceptset, timeval *timeout) noexcept;
 
-    // Currently not available through a C API because there's no need
 #ifdef _WIN32
     virtual int system_ioctlsocket(
           SOCKET s, long cmd, unsigned long *argp) noexcept;
@@ -87,7 +92,6 @@ class Context : public LoggerMixin {
     virtual int system_fcntl_int(int fd, int cmd, int arg) noexcept;
 #endif
 
-    // Currently not available through a C API because there's no need
 #ifdef _WIN32
     virtual int system_wsasend(SOCKET s, LPWSABUF lpBuffers,
           DWORD dwBufferCount, LPDWORD lpNumberOfBytesSent, DWORD dwFlags,
@@ -98,6 +102,31 @@ class Context : public LoggerMixin {
           int fd, const struct iovec *iov, int iovcnt) noexcept;
 #endif
 
+    Ssize writev(Socket socket, const iovec *iov, int iovcnt) noexcept;
+
+    virtual ~SystemMixin() noexcept;
+};
+
+class Context : public LoggerMixin, public SystemMixin {
+  public:
+    static void set_thread_local(Context *ctx) noexcept;
+
+    static Context *get_thread_local() noexcept;
+
+    virtual double now() noexcept;
+
+    virtual int setnonblocking(Socket handle, bool enable) noexcept;
+
+    virtual int sockaddr_pton(const char *address, const char *port,
+          sockaddr_storage *sst) noexcept;
+
+    virtual int sockaddr_ntop(
+          const sockaddr *sa, std::string *address, std::string *port) noexcept;
+
+    virtual std::string hexdump(const void *data, size_t count) noexcept;
+
+    virtual int wsainit() noexcept;
+
     virtual ~Context() noexcept;
 };
 
@@ -105,35 +134,34 @@ class Context : public LoggerMixin {
 } // namespace remk
 #endif
 
-#define REMK_PLATFORM_EMIT_LOG_(level_, statements_, print_last_error_)        \
+#define REMK_PLATFORM_EMIT_LOG_(ctx_, level_, statements_, print_last_error_)  \
     do {                                                                       \
-        auto ctx = remk::platform::Context::get_thread_local();                \
-        if (level_ <= ctx->get_log_level()) {                                  \
+        if (level_ <= ctx_->get_log_level()) {                                 \
             std::stringstream ss;                                              \
             ss << statements_;                                                 \
             if (print_last_error_) {                                           \
-                ss << ": " << ctx->get_last_error();                           \
+                ss << ": " << ctx_->get_last_error();                          \
             }                                                                  \
-            ctx->emit_log(level_, ss);                                         \
+            ctx_->emit_log(level_, ss);                                        \
         }                                                                      \
     } while (0)
 
-#define REMK_PLATFORM_WARN(statements_)                                        \
-    REMK_PLATFORM_EMIT_LOG_(REMK_PLATFORM_LOG_WARNING, statements_, true)
+#define REMK_PLATFORM_WARN(ctx_, statements_)                                  \
+    REMK_PLATFORM_EMIT_LOG_(ctx_, REMK_PLATFORM_LOG_WARNING, statements_, true)
 
-#define REMK_PLATFORM_WARNX(statements_)                                       \
-    REMK_PLATFORM_EMIT_LOG_(REMK_PLATFORM_LOG_WARNING, statements_, false)
+#define REMK_PLATFORM_WARNX(ctx_, statements_)                                 \
+    REMK_PLATFORM_EMIT_LOG_(ctx_, REMK_PLATFORM_LOG_WARNING, statements_, false)
 
-#define REMK_PLATFORM_INFO(statements_)                                        \
-    REMK_PLATFORM_EMIT_LOG_(REMK_PLATFORM_LOG_INFO, statements_, true)
+#define REMK_PLATFORM_INFO(ctx_, statements_)                                  \
+    REMK_PLATFORM_EMIT_LOG_(ctx_, REMK_PLATFORM_LOG_INFO, statements_, true)
 
-#define REMK_PLATFORM_INFOX(statements_)                                       \
-    REMK_PLATFORM_EMIT_LOG_(REMK_PLATFORM_LOG_INFO, statements_, false)
+#define REMK_PLATFORM_INFOX(ctx_, statements_)                                 \
+    REMK_PLATFORM_EMIT_LOG_(ctx_, REMK_PLATFORM_LOG_INFO, statements_, false)
 
-#define REMK_PLATFORM_DEBUG(statements_)                                       \
-    REMK_PLATFORM_EMIT_LOG_(REMK_PLATFORM_LOG_DEBUG, statements_, true)
+#define REMK_PLATFORM_DEBUG(ctx_, statements_)                                 \
+    REMK_PLATFORM_EMIT_LOG_(ctx_, REMK_PLATFORM_LOG_DEBUG, statements_, true)
 
-#define REMK_PLATFORM_DEBUGX(statements_)                                      \
-    REMK_PLATFORM_EMIT_LOG_(REMK_PLATFORM_LOG_DEBUG, statements_, false)
+#define REMK_PLATFORM_DEBUGX(ctx_, statements_)                                \
+    REMK_PLATFORM_EMIT_LOG_(ctx_, REMK_PLATFORM_LOG_DEBUG, statements_, false)
 
 #endif
