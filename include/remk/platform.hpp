@@ -163,6 +163,15 @@ class Context : public LoggerMixin, public SystemMixin {
 
     virtual Socket connect_tcp(const char *hostname, const char *port) noexcept;
 
+    /* Continue reading until |count| bytes have been read. Internally uses
+       this->select() so you can abort the read loop. */
+    virtual Ssize readn(
+          Socket handle, void *buffer, Size count, int flags) noexcept;
+
+    /* Same as readn() but for writing. */
+    virtual Ssize writen(
+          Socket handle, const void *buffer, Size count, int flags) noexcept;
+
     /* Initializes Windows sockets. Is a no-op on Unix. Must be called
        from the main application, not from a DLL. */
     virtual int wsainit() noexcept;

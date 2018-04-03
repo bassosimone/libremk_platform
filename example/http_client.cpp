@@ -18,14 +18,14 @@ int main() {
     }
     remk::platform::DeferClosesocket dcs{ctx.get(), sock};
     std::string req = "GET /robots.txt HTTP/1.0\r\n\r\n";
-    auto nbytes = ctx->send(
+    auto nbytes = ctx->writen(
           sock, req.c_str(), (remk::platform::Size)req.size(), 0);
     if (nbytes < 0 || (size_t)nbytes != req.size()) {
         REMK_PLATFORM_WARN(ctx, "send: retval=" << nbytes);
         exit(EXIT_FAILURE);
     }
     char buffer[7];
-    nbytes = ctx->recv(sock, buffer, sizeof(buffer) - 1, 0);
+    nbytes = ctx->readn(sock, buffer, sizeof(buffer) - 1, 0);
     if (nbytes <= 0) {
         REMK_PLATFORM_WARN(ctx, "recv: retval=" << nbytes);
         exit(EXIT_FAILURE);

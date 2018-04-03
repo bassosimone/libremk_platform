@@ -362,6 +362,78 @@ Socket Context::connect_tcp(const char *hostname, const char *port) noexcept {
     return -1;
 }
 
+Ssize Context::readn(
+          Socket handle, void *buffer, Size count, int flags) noexcept {
+    Ssize retval = 0;
+    Size off = 0;
+    while (off < count) {
+        // Be reactive so it works with blocking sockets as well.
+        fd_set readset;
+        FD_ZERO(&readset);
+        FD_SET(handle, &readset);
+        int ctrl = this->select( //
+              handle + 1, &readset, nullptr, nullptr, nullptr);
+        if (ctrl == -1) {
+#ifndef _WIN32
+            if (errno == EINTR) {
+                continue;
+            }
+#endif
+            return -1;
+        }
+        assert(ctrl > 0);
+        // Cast to `char *` required to force pointer arithmetics.
+        Ssize n = this->recv(handle, (char *)buffer + off, count - off, flags);
+        if (n <= 0) {
+            return n; // Either all success or failure.
+        }
+        // Make sure `retval += n` won't overflow `INT_MAX` (arbitrary).
+        if (n > INT_MAX || retval > INT_MAX - n) {
+            this->set_last_error(REMK_PLATFORM_ERROR_NAME(INVAL));
+            return -1;
+        }
+        retval += n;
+        off += (Size)n;
+    }
+    return retval;
+}
+
+Ssize Context::writen(
+          Socket handle, const void *buffer, Size count, int flags) noexcept {
+    Ssize retval = 0;
+    Size off = 0;
+    while (off < count) {
+        // Be reactive so it works with blocking sockets as well.
+        fd_set writeset;
+        FD_ZERO(&writeset);
+        FD_SET(handle, &writeset);
+        int ctrl = this->select( //
+              handle + 1, nullptr, &writeset, nullptr, nullptr);
+        if (ctrl == -1) {
+#ifndef _WIN32
+            if (errno == EINTR) {
+                continue;
+            }
+#endif
+            return -1;
+        }
+        assert(ctrl > 0);
+        // Cast to `char *` required to force pointer arithmetics.
+        Ssize n = this->send(handle, (char *)buffer + off, count - off, flags);
+        if (n <= 0) {
+            return n; // Either all success or failure.
+        }
+        // Make sure `retval += n` won't overflow `INT_MAX` (arbitrary).
+        if (n > INT_MAX || retval > INT_MAX - n) {
+            this->set_last_error(REMK_PLATFORM_ERROR_NAME(INVAL));
+            return -1;
+        }
+        retval += n;
+        off += (Size)n;
+    }
+    return retval;
+}
+
 int Context::wsainit() noexcept {
 #ifdef _WIN32
     WORD version = MAKEWORD(2, 2);
