@@ -1,4 +1,4 @@
-#include <remk/platform.h>
+#include <remk/platform.hpp>
 
 #include <stdlib.h>
 

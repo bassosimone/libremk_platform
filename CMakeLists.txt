@@ -15,9 +15,8 @@ if(UNIX)
 endif()
 add_library(
   remk_platform
-  include/remk/platform.h
-  include/remk/platform/context.h
-  src/context.cpp
+  include/remk/platform.hpp
+  src/platform.cpp
 )
 target_include_directories(
   remk_platform

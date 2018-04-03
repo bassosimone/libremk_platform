@@ -1,6 +1,5 @@
-#ifndef REMK_PLATFORM_CONTEXT_H
-#define REMK_PLATFORM_CONTEXT_H
-#ifdef __cplusplus
+#ifndef REMK_PLATFORM_HPP
+#define REMK_PLATFORM_HPP
 
 #ifdef _WIN32
 #include <basetsd.h>
@@ -201,7 +200,6 @@ class DeferFreeaddrinfo {
 
 } // namespace platform
 } // namespace remk
-#endif
 
 #define REMK_PLATFORM_EMIT_LOG_(ctx_, level_, statements_, print_last_error_)  \
     do {                                                                       \
