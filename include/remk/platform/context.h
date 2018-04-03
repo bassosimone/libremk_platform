@@ -143,7 +143,7 @@ class SystemMixin {
           int fd, const struct iovec *iov, int iovcnt) noexcept;
 #endif
 
-    Ssize writev(Socket socket, const iovec *iov, int iovcnt) noexcept;
+    virtual Ssize writev(Socket socket, const iovec *iov, int iovcnt) noexcept;
 
     virtual ~SystemMixin() noexcept;
 };
