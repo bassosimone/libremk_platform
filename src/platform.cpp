@@ -326,6 +326,42 @@ std::string Context::hexdump(const void *data, size_t count) noexcept {
     return ss.str();
 }
 
+Socket Context::connect_tcp(const char *hostname, const char *port) noexcept {
+    if (hostname == nullptr || port == nullptr) {
+        this->set_last_error(REMK_PLATFORM_ERROR_NAME(INVAL));
+        return -1;
+    }
+    addrinfo hints{};
+    hints.ai_flags |= AI_NUMERICSERV;
+    hints.ai_socktype = SOCK_STREAM;
+    addrinfo *rp = nullptr;
+    int rv = this->getaddrinfo(hostname, port, &hints, &rp);
+    if (rv != 0) {
+        REMK_PLATFORM_WARNX(this, "getaddrinfo: " << rv);
+        return -1;
+    }
+    remk::platform::DeferFreeaddrinfo dfa{this, rp};
+    REMK_PLATFORM_DEBUGX(this, "getaddrinfo: success");
+    for (auto ai = rp; ai != nullptr; ai = ai->ai_next) {
+        auto sock = this->socket(ai->ai_family, ai->ai_socktype, 0);
+        if (sock == -1) {
+            REMK_PLATFORM_WARN(this, "socket");
+            continue;
+        }
+        REMK_PLATFORM_DEBUGX(this, "socket: success");
+        if (this->connect(sock, ai->ai_addr,
+                  (remk::platform::Socklen)ai->ai_addrlen) == 0) {
+            REMK_PLATFORM_DEBUGX(this, "connect: success");
+            return sock;
+        }
+        REMK_PLATFORM_WARN(this, "connect");
+        this->closesocket(sock);
+    }
+    REMK_PLATFORM_WARNX(this, "all connect attempts failed");
+    /* The `errno` value should be the last error that occurred. */
+    return -1;
+}
+
 int Context::wsainit() noexcept {
 #ifdef _WIN32
     WORD version = MAKEWORD(2, 2);

@@ -12,36 +12,8 @@ int main() {
         REMK_PLATFORM_WARN(ctx, "wsainit");
         exit(EXIT_FAILURE);
     }
-    addrinfo hints{};
-    hints.ai_flags |= AI_NUMERICSERV;
-    hints.ai_socktype = SOCK_STREAM;
-    addrinfo *rp = nullptr;
-    int rv = ctx->getaddrinfo("www.google.com", "80", &hints, &rp);
-    if (rv != 0) {
-        REMK_PLATFORM_WARNX(ctx, "getaddrinfo: " << rv);
-        exit(EXIT_FAILURE);
-    }
-    remk::platform::DeferFreeaddrinfo dfa{ctx.get(), rp};
-    REMK_PLATFORM_INFOX(ctx, "getaddrinfo: success");
-    remk::platform::Socket sock = -1;
-    for (auto ai = rp; ai != nullptr; ai = ai->ai_next) {
-        sock = ctx->socket(ai->ai_family, ai->ai_socktype, 0);
-        if (sock == -1) {
-            REMK_PLATFORM_WARN(ctx, "socket");
-            continue;
-        }
-        REMK_PLATFORM_INFOX(ctx, "socket: success");
-        if (ctx->connect(sock, ai->ai_addr,
-                  (remk::platform::Socklen)ai->ai_addrlen) == 0) {
-            REMK_PLATFORM_INFOX(ctx, "connect: success");
-            break;
-        }
-        REMK_PLATFORM_WARN(ctx, "connect");
-        ctx->closesocket(sock);
-        sock = -1;
-    }
+    int sock = ctx->connect_tcp("www.google.com", "80");
     if (sock == -1) {
-        REMK_PLATFORM_WARNX(ctx, "all connect attempts failed");
         exit(EXIT_FAILURE);
     }
     remk::platform::DeferClosesocket dcs{ctx.get(), sock};

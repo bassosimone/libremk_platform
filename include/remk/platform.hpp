@@ -161,6 +161,8 @@ class Context : public LoggerMixin, public SystemMixin {
 
     virtual std::string hexdump(const void *data, size_t count) noexcept;
 
+    virtual Socket connect_tcp(const char *hostname, const char *port) noexcept;
+
     /* Initializes Windows sockets. Is a no-op on Unix. Must be called
        from the main application, not from a DLL. */
     virtual int wsainit() noexcept;
