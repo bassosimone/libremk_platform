@@ -21,7 +21,7 @@ int main() {
         REMK_PLATFORM_WARNX(ctx, "getaddrinfo: " << rv);
         exit(EXIT_FAILURE);
     }
-    remk::platform::DeferFreeaddrinfo dfa{ctx, rp};
+    remk::platform::DeferFreeaddrinfo dfa{ctx.get(), rp};
     REMK_PLATFORM_INFOX(ctx, "getaddrinfo: success");
     remk::platform::Socket sock = -1;
     for (auto ai = rp; ai != nullptr; ai = ai->ai_next) {
@@ -44,7 +44,7 @@ int main() {
         REMK_PLATFORM_WARNX(ctx, "all connect attempts failed");
         exit(EXIT_FAILURE);
     }
-    remk::platform::DeferClosesocket dcs{ctx, sock};
+    remk::platform::DeferClosesocket dcs{ctx.get(), sock};
     std::string req = "GET /robots.txt HTTP/1.0\r\n\r\n";
     auto nbytes = ctx->send(
           sock, req.c_str(), (remk::platform::Size)req.size(), 0);
