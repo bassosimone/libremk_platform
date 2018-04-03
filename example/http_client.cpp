@@ -12,7 +12,7 @@ int main() {
         REMK_PLATFORM_WARN(ctx, "wsainit");
         exit(EXIT_FAILURE);
     }
-    int sock = ctx->connect_tcp("www.google.com", "80");
+    auto sock = ctx->connect_tcp("www.google.com", "80");
     if (sock == -1) {
         exit(EXIT_FAILURE);
     }
