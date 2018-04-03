@@ -2,23 +2,62 @@
 #define REMK_PLATFORM_CONTEXT_H
 #ifdef __cplusplus
 
-#include <remk/platform/aaa_base.h>
-#include <remk/platform/uio.h>
+#ifdef _WIN32
+#include <basetsd.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#else
+#include <errno.h>
+#include <netdb.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <unistd.h>
+#endif
+
+#include <time.h>
 
 #include <sstream>
 #include <string>
+
+#ifndef TIME_UTC
+#define TIME_UTC 1
+#endif
+
+#ifdef _WIN32
+struct iovec {
+    void *iov_base;
+    SIZE_T iov_len;
+};
+#define IOV_MAX 64
+#endif
 
 #define REMK_PLATFORM_LOG_WARNING 0
 #define REMK_PLATFORM_LOG_INFO 1
 #define REMK_PLATFORM_LOG_DEBUG 2
 
+#ifdef _WIN32
+#define REMK_PLATFORM_ERROR_NAME(name_) WSAE##name_
+#else
+#define REMK_PLATFORM_ERROR_NAME(name_) E##name_
+#endif
+
 namespace remk {
 namespace platform {
 
-using Socket = remk_platform_socket_t;
-using Socklen = remk_platform_socklen_t;
-using Ssize = remk_platform_ssize_t;
-using Size = remk_platform_size_t;
+#ifdef _WIN32
+using Socket = SOCKET;
+using Size = SIZE_T;
+using Socklen = int;
+using Ssize = SSIZE_T;
+#else
+using Socket = int;
+using Size = size_t;
+using Socklen = socklen_t;
+using Ssize = ssize_t;
+#endif
 
 class LoggerMixin {
   public:
@@ -52,6 +91,8 @@ class SystemMixin {
     virtual int connect(
           Socket handle, const sockaddr *saddr, Socklen len) noexcept;
 
+    /* The following function has the same ABI of the corresponding system API,
+       instead remk_platform_recv() has a uniform ABI regardless of the OS. */
 #ifdef _WIN32
     virtual int system_recvfrom(SOCKET handle, char *buffer, int count,
           int flags, sockaddr *addr, int *len) noexcept;
@@ -109,10 +150,6 @@ class SystemMixin {
 
 class Context : public LoggerMixin, public SystemMixin {
   public:
-    static void set_thread_local(Context *ctx) noexcept;
-
-    static Context *get_thread_local() noexcept;
-
     virtual double now() noexcept;
 
     virtual int setnonblocking(Socket handle, bool enable) noexcept;
@@ -125,6 +162,8 @@ class Context : public LoggerMixin, public SystemMixin {
 
     virtual std::string hexdump(const void *data, size_t count) noexcept;
 
+    /* Initializes Windows sockets. Is a no-op on Unix. Must be called
+       from the main application, not from a DLL. */
     virtual int wsainit() noexcept;
 
     virtual ~Context() noexcept;

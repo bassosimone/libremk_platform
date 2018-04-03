@@ -13,8 +13,6 @@
 #include <memory>
 #include <sstream>
 
-#include <remk/platform/errno.h>
-
 namespace remk {
 namespace platform {
 
@@ -36,17 +34,6 @@ void LoggerMixin::emit_log(int level, const std::stringstream &ss) noexcept {
 }
 
 LoggerMixin::~LoggerMixin() noexcept {}
-
-// TODO(bassosimone): make sure this works on iOS armv7s. For reference
-// see https://github.com/measurement-kit/measurement-kit/issues/1319.
-static thread_local Context *pointer_ = nullptr;
-
-/*static*/ void Context::set_thread_local(Context *p) noexcept { pointer_ = p; }
-
-/*static*/ Context *Context::get_thread_local() noexcept {
-    static Context global_context_;
-    return (pointer_ != nullptr) ? pointer_ : &global_context_;
-}
 
 // TODO(bassosimone): see whether we can use a monotonic clock here.
 int SystemMixin::timespec_get(timespec *ts, int base) noexcept {
@@ -176,9 +163,6 @@ int SystemMixin::select(int maxfd, fd_set *readset, fd_set *writeset,
     return ::select(maxfd, readset, writeset, exceptset, timeout);
 }
 
-SystemMixin::~SystemMixin() noexcept {}
-Context::~Context() noexcept {}
-
 #ifdef _WIN32
 int SystemMixin::system_ioctlsocket(
       SOCKET s, long cmd, unsigned long *argp) noexcept {
@@ -242,6 +226,8 @@ Ssize SystemMixin::writev(
     return this->system_writev(socket, iov, iovcnt);
 #endif
 }
+
+SystemMixin::~SystemMixin() noexcept {}
 
 double Context::now() noexcept {
     timespec ts{};
@@ -319,7 +305,7 @@ int Context::sockaddr_pton(
         this->set_last_error(REMK_PLATFORM_ERROR_NAME(INVAL));
         return -1;
     }
-    assert(rp != nullptr && rp->ai_addr && rp->ai_addrlen == sizeof(*sst));
+    assert(rp != nullptr && rp->ai_addr && rp->ai_addrlen <= sizeof(*sst));
     memcpy(sst, rp->ai_addr, rp->ai_addrlen);
     ::freeaddrinfo(rp);
     return 0;
@@ -350,6 +336,8 @@ int Context::wsainit() noexcept {
 #endif
     return 0;
 }
+
+Context::~Context() noexcept {}
 
 } // namespace platform
 } // namespace remk

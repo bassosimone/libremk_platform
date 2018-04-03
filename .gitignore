@@ -1,6 +1,8 @@
+/.vs
 /CMakeCache.txt
 /CMakeFiles/
 /Makefile
 /cmake_install.cmake
-/libremk_platform.dylib
+/install_manifest.txt
 /libremk_platform.a
+/libremk_platform.dylib
