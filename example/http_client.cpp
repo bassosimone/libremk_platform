@@ -1,4 +1,4 @@
-#include <remk/platform.h>
+#include <remk/platform.hpp>
 
 #include <stdlib.h>
 
@@ -12,55 +12,25 @@ int main() {
         REMK_PLATFORM_WARN(ctx, "wsainit");
         exit(EXIT_FAILURE);
     }
-    addrinfo hints{};
-    hints.ai_flags |= AI_NUMERICSERV;
-    hints.ai_socktype = SOCK_STREAM;
-    addrinfo *rp = nullptr;
-    int rv = ctx->getaddrinfo("www.google.com", "80", &hints, &rp);
-    if (rv != 0) {
-        REMK_PLATFORM_WARNX(ctx, "getaddrinfo: " << rv);
-        exit(EXIT_FAILURE);
-    }
-    REMK_PLATFORM_INFOX(ctx, "getaddrinfo: success");
-    remk::platform::Socket sock = -1;
-    for (auto ai = rp; ai != nullptr; ai = ai->ai_next) {
-        sock = ctx->socket(ai->ai_family, ai->ai_socktype, 0);
-        if (sock == -1) {
-            REMK_PLATFORM_WARN(ctx, "socket");
-            continue;
-        }
-        REMK_PLATFORM_INFOX(ctx, "socket: success");
-        if (ctx->connect(sock, ai->ai_addr,
-                  (remk::platform::Socklen)ai->ai_addrlen) == 0) {
-            REMK_PLATFORM_INFOX(ctx, "connect: success");
-            break;
-        }
-        REMK_PLATFORM_WARN(ctx, "connect");
-        ctx->closesocket(sock);
-        sock = -1;
-    }
-    ctx->freeaddrinfo(rp);
+    auto sock = ctx->connect_tcp("www.google.com", "80");
     if (sock == -1) {
-        REMK_PLATFORM_WARNX(ctx, "all connect attempts failed");
         exit(EXIT_FAILURE);
     }
+    remk::platform::DeferClosesocket dcs{ctx.get(), sock};
     std::string req = "GET /robots.txt HTTP/1.0\r\n\r\n";
-    auto nbytes = ctx->send(
+    auto nbytes = ctx->writen(
           sock, req.c_str(), (remk::platform::Size)req.size(), 0);
     if (nbytes < 0 || (size_t)nbytes != req.size()) {
         REMK_PLATFORM_WARN(ctx, "send: retval=" << nbytes);
-        ctx->closesocket(sock);
         exit(EXIT_FAILURE);
     }
     char buffer[7];
-    nbytes = ctx->recv(sock, buffer, sizeof(buffer) - 1, 0);
+    nbytes = ctx->readn(sock, buffer, sizeof(buffer) - 1, 0);
     if (nbytes <= 0) {
         REMK_PLATFORM_WARN(ctx, "recv: retval=" << nbytes);
-        ctx->closesocket(sock);
         exit(EXIT_FAILURE);
     }
     buffer[(size_t)nbytes] = '\0';
     REMK_PLATFORM_INFOX(ctx, "recv: nbytes=" << nbytes << " data=" << buffer);
-    ctx->closesocket(sock);
     exit(EXIT_SUCCESS);
 }

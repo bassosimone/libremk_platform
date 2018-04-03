@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.1.0)
 project(remk_platform CXX)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_STANDARD 14)
@@ -8,16 +8,15 @@ set(REMK_PLATFORM_ABI_MINOR 0)
 set(REMK_PLATFORM_ABI_PATCH 0)
 set(REMK_PLATFORM_ABI ${REMK_PLATFORM_ABI_MAJOR}.${REMK_PLATFORM_ABI_MINOR}.${REMK_PLATFORM_ABI_PATCH})
 if(UNIX)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -pedantic -fno-rtti -fno-exceptions")
   if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wmissing-prototypes")
   endif()
 endif()
 add_library(
   remk_platform
-  include/remk/platform.h
-  include/remk/platform/context.h
-  src/context.cpp
+  include/remk/platform.hpp
+  src/platform.cpp
 )
 target_include_directories(
   remk_platform

@@ -1,4 +1,4 @@
-#include <remk/platform/context.h>
+#include <remk/platform.hpp>
 
 #ifndef _WIN32
 #include <fcntl.h>
@@ -326,6 +326,114 @@ std::string Context::hexdump(const void *data, size_t count) noexcept {
     return ss.str();
 }
 
+Socket Context::connect_tcp(const char *hostname, const char *port) noexcept {
+    if (hostname == nullptr || port == nullptr) {
+        this->set_last_error(REMK_PLATFORM_ERROR_NAME(INVAL));
+        return -1;
+    }
+    addrinfo hints{};
+    hints.ai_flags |= AI_NUMERICSERV;
+    hints.ai_socktype = SOCK_STREAM;
+    addrinfo *rp = nullptr;
+    int rv = this->getaddrinfo(hostname, port, &hints, &rp);
+    if (rv != 0) {
+        REMK_PLATFORM_WARNX(this, "getaddrinfo: " << rv);
+        return -1;
+    }
+    remk::platform::DeferFreeaddrinfo dfa{this, rp};
+    REMK_PLATFORM_DEBUGX(this, "getaddrinfo: success");
+    for (auto ai = rp; ai != nullptr; ai = ai->ai_next) {
+        auto sock = this->socket(ai->ai_family, ai->ai_socktype, 0);
+        if (sock == -1) {
+            REMK_PLATFORM_WARN(this, "socket");
+            continue;
+        }
+        REMK_PLATFORM_DEBUGX(this, "socket: success");
+        if (this->connect(sock, ai->ai_addr,
+                  (remk::platform::Socklen)ai->ai_addrlen) == 0) {
+            REMK_PLATFORM_DEBUGX(this, "connect: success");
+            return sock;
+        }
+        REMK_PLATFORM_WARN(this, "connect");
+        this->closesocket(sock);
+    }
+    REMK_PLATFORM_WARNX(this, "all connect attempts failed");
+    /* The `errno` value should be the last error that occurred. */
+    return -1;
+}
+
+Ssize Context::readn(
+          Socket handle, void *buffer, Size count, int flags) noexcept {
+    Ssize retval = 0;
+    Size off = 0;
+    while (off < count) {
+        // Be reactive so it works with blocking sockets as well.
+        fd_set readset;
+        FD_ZERO(&readset);
+        FD_SET(handle, &readset);
+        int ctrl = this->select( //
+              handle + 1, &readset, nullptr, nullptr, nullptr);
+        if (ctrl == -1) {
+#ifndef _WIN32
+            if (errno == EINTR) {
+                continue;
+            }
+#endif
+            return -1;
+        }
+        assert(ctrl > 0);
+        // Cast to `char *` required to force pointer arithmetics.
+        Ssize n = this->recv(handle, (char *)buffer + off, count - off, flags);
+        if (n <= 0) {
+            return n; // Either all success or failure.
+        }
+        // Make sure `retval += n` won't overflow `INT_MAX` (arbitrary).
+        if (n > INT_MAX || retval > INT_MAX - n) {
+            this->set_last_error(REMK_PLATFORM_ERROR_NAME(INVAL));
+            return -1;
+        }
+        retval += n;
+        off += (Size)n;
+    }
+    return retval;
+}
+
+Ssize Context::writen(
+          Socket handle, const void *buffer, Size count, int flags) noexcept {
+    Ssize retval = 0;
+    Size off = 0;
+    while (off < count) {
+        // Be reactive so it works with blocking sockets as well.
+        fd_set writeset;
+        FD_ZERO(&writeset);
+        FD_SET(handle, &writeset);
+        int ctrl = this->select( //
+              handle + 1, nullptr, &writeset, nullptr, nullptr);
+        if (ctrl == -1) {
+#ifndef _WIN32
+            if (errno == EINTR) {
+                continue;
+            }
+#endif
+            return -1;
+        }
+        assert(ctrl > 0);
+        // Cast to `char *` required to force pointer arithmetics.
+        Ssize n = this->send(handle, (char *)buffer + off, count - off, flags);
+        if (n <= 0) {
+            return n; // Either all success or failure.
+        }
+        // Make sure `retval += n` won't overflow `INT_MAX` (arbitrary).
+        if (n > INT_MAX || retval > INT_MAX - n) {
+            this->set_last_error(REMK_PLATFORM_ERROR_NAME(INVAL));
+            return -1;
+        }
+        retval += n;
+        off += (Size)n;
+    }
+    return retval;
+}
+
 int Context::wsainit() noexcept {
 #ifdef _WIN32
     WORD version = MAKEWORD(2, 2);
@@ -338,6 +446,24 @@ int Context::wsainit() noexcept {
 }
 
 Context::~Context() noexcept {}
+
+DeferClosesocket::DeferClosesocket(Context *ctx, Socket sock) noexcept
+    : ctx_{ctx}, sock_{sock} {}
+
+DeferClosesocket::~DeferClosesocket() noexcept {
+    if (sock_ != -1) {
+        (void)ctx_->closesocket(sock_);
+    }
+}
+
+DeferFreeaddrinfo::DeferFreeaddrinfo(Context *ctx, addrinfo *aip) noexcept
+    : ctx_{ctx}, aip_{aip} {}
+
+DeferFreeaddrinfo::~DeferFreeaddrinfo() noexcept {
+    if (aip_ != nullptr) {
+        (void)ctx_->freeaddrinfo(aip_);
+    }
+}
 
 } // namespace platform
 } // namespace remk

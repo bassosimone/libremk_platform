@@ -1,6 +1,5 @@
-#ifndef REMK_PLATFORM_CONTEXT_H
-#define REMK_PLATFORM_CONTEXT_H
-#ifdef __cplusplus
+#ifndef REMK_PLATFORM_HPP
+#define REMK_PLATFORM_HPP
 
 #ifdef _WIN32
 #include <basetsd.h>
@@ -143,7 +142,7 @@ class SystemMixin {
           int fd, const struct iovec *iov, int iovcnt) noexcept;
 #endif
 
-    Ssize writev(Socket socket, const iovec *iov, int iovcnt) noexcept;
+    virtual Ssize writev(Socket socket, const iovec *iov, int iovcnt) noexcept;
 
     virtual ~SystemMixin() noexcept;
 };
@@ -162,6 +161,17 @@ class Context : public LoggerMixin, public SystemMixin {
 
     virtual std::string hexdump(const void *data, size_t count) noexcept;
 
+    virtual Socket connect_tcp(const char *hostname, const char *port) noexcept;
+
+    /* Continue reading until |count| bytes have been read. Internally uses
+       this->select() so you can abort the read loop. */
+    virtual Ssize readn(
+          Socket handle, void *buffer, Size count, int flags) noexcept;
+
+    /* Same as readn() but for writing. */
+    virtual Ssize writen(
+          Socket handle, const void *buffer, Size count, int flags) noexcept;
+
     /* Initializes Windows sockets. Is a no-op on Unix. Must be called
        from the main application, not from a DLL. */
     virtual int wsainit() noexcept;
@@ -169,9 +179,38 @@ class Context : public LoggerMixin, public SystemMixin {
     virtual ~Context() noexcept;
 };
 
+class DeferClosesocket {
+  public:
+    DeferClosesocket(Context *ctx, Socket sock) noexcept;
+    ~DeferClosesocket() noexcept;
+
+    DeferClosesocket(const DeferClosesocket &) = delete;
+    DeferClosesocket &operator=(const DeferClosesocket &) = delete;
+    DeferClosesocket(DeferClosesocket &&) = delete;
+    DeferClosesocket &operator=(DeferClosesocket &&) = delete;
+
+  private:
+    Context *ctx_;
+    Socket sock_;
+};
+
+class DeferFreeaddrinfo {
+  public:
+    DeferFreeaddrinfo(Context *ctx, addrinfo *aip) noexcept;
+    ~DeferFreeaddrinfo() noexcept;
+
+    DeferFreeaddrinfo(const DeferFreeaddrinfo &) = delete;
+    DeferFreeaddrinfo &operator=(const DeferFreeaddrinfo &) = delete;
+    DeferFreeaddrinfo(DeferFreeaddrinfo &&) = delete;
+    DeferFreeaddrinfo &operator=(DeferFreeaddrinfo &&) = delete;
+
+  private:
+    Context *ctx_;
+    addrinfo *aip_;
+};
+
 } // namespace platform
 } // namespace remk
-#endif
 
 #define REMK_PLATFORM_EMIT_LOG_(ctx_, level_, statements_, print_last_error_)  \
     do {                                                                       \
