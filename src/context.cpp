@@ -339,5 +339,23 @@ int Context::wsainit() noexcept {
 
 Context::~Context() noexcept {}
 
+DeferClosesocket::DeferClosesocket(Context *ctx, Socket sock) noexcept
+    : ctx_{ctx}, sock_{sock} {}
+
+DeferClosesocket::~DeferClosesocket() noexcept {
+    if (sock_ != -1) {
+        (void)ctx_->closesocket(sock_);
+    }
+}
+
+DeferFreeaddrinfo::DeferFreeaddrinfo(Context *ctx, addrinfo *aip) noexcept
+    : ctx_{ctx}, aip_{aip} {}
+
+DeferFreeaddrinfo::~DeferFreeaddrinfo() noexcept {
+    if (aip_ != nullptr) {
+        (void)ctx_->freeaddrinfo(aip_);
+    }
+}
+
 } // namespace platform
 } // namespace remk

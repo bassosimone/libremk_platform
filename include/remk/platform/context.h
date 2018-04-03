@@ -169,6 +169,36 @@ class Context : public LoggerMixin, public SystemMixin {
     virtual ~Context() noexcept;
 };
 
+class DeferClosesocket {
+  public:
+    DeferClosesocket(Context *ctx, Socket sock) noexcept;
+    ~DeferClosesocket() noexcept;
+
+    DeferClosesocket(const DeferClosesocket &) = delete;
+    DeferClosesocket &operator=(const DeferClosesocket &) = delete;
+    DeferClosesocket(DeferClosesocket &&) = delete;
+    DeferClosesocket &operator=(DeferClosesocket &&) = delete;
+
+  private:
+    Context *ctx_;
+    Socket sock_;
+};
+
+class DeferFreeaddrinfo {
+  public:
+    DeferFreeaddrinfo(Context *ctx, addrinfo *aip) noexcept;
+    ~DeferFreeaddrinfo() noexcept;
+
+    DeferFreeaddrinfo(const DeferFreeaddrinfo &) = delete;
+    DeferFreeaddrinfo &operator=(const DeferFreeaddrinfo &) = delete;
+    DeferFreeaddrinfo(DeferFreeaddrinfo &&) = delete;
+    DeferFreeaddrinfo &operator=(DeferFreeaddrinfo &&) = delete;
+
+  private:
+    Context *ctx_;
+    addrinfo *aip_;
+};
+
 } // namespace platform
 } // namespace remk
 #endif
