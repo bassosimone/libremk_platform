@@ -13,14 +13,14 @@ addons:
 matrix:
   include:
     - os: linux
-      environ: BUILD_TYPE="vanilla"
       compiler: gcc-7
+      env: BUILD_TYPE="vanilla"
     - os: linux
-      environ: BUILD_TYPE="coverage"
-               CFLAGS="-O0 -g -fprofile-arcs -ftest-coverage"
-               CXXFLAGS="-O0 -g -fprofile-arcs -ftest-coverage"
-               LDFLAGS="-lgcov"
       compiler: gcc-7
+      env: BUILD_TYPE="coverage"
+           CFLAGS="-O0 -g -fprofile-arcs -ftest-coverage"
+           CXXFLAGS="-O0 -g -fprofile-arcs -ftest-coverage"
+           LDFLAGS="-lgcov"
 
 script:
   - |
