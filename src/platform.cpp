@@ -14,6 +14,8 @@
 #include <memory>
 #include <sstream>
 
+#include "src/third_party/utf8_decode.h"
+
 namespace remk {
 namespace platform {
 
@@ -494,7 +496,8 @@ int Context::wsainit() noexcept {
 
 Context::~Context() noexcept {}
 
-/*static*/ std::string classify_system_error(int system_error) {
+/*static*/ std::string Context::classify_system_error(
+      int system_error) noexcept {
 #if !defined _WIN32 && EWOUDLBLOCK != EAGAIN // Theoretically possible
     if (system_error == EAGAIN) {
         system_error = EWOULDBLOCK;
@@ -539,6 +542,25 @@ Context::~Context() noexcept {}
     std::stringstream ss;
     ss << "unknown_system_error " << system_error;
     return ss.str();
+}
+
+/*static*/ bool Context::is_valid_utf8(const std::string &str) noexcept {
+    uint32_t ignored = 0;
+    uint32_t state = UTF8_ACCEPT;
+    for (const char &ch : str) {
+        // Implementation note: rather than casting to `uint32_t` directly just
+        // make `ch` unsigned and let the compiler extend the value. Here I am
+        // trying to protect against the possibility that converting a negative
+        // char value to `uint32_t` in some platforms may lead to obtaining an
+        // unreasonably large value because of the leading `1`. I seem to recall
+        // something like that happened to me in 2006 with a PPC, but too much
+        // time has passed. If I'm wrong we can change this in the future.
+        (void)utf8_decode(&state, &ignored, (unsigned char)ch);
+        if (state == UTF8_REJECT) {
+            return false;
+        }
+    }
+    return state == UTF8_ACCEPT;
 }
 
 DeferClosesocket::DeferClosesocket(Context *ctx, Socket sock) noexcept

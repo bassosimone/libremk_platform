@@ -17,11 +17,13 @@ add_library(
   remk_platform
   include/remk/platform.hpp
   src/platform.cpp
+  src/third_party/utf8_decode.h
 )
 target_include_directories(
   remk_platform
   PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}
 )
 set_target_properties(
   remk_platform
