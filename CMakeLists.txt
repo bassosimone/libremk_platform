@@ -42,6 +42,7 @@ add_library(
   src/platform.cpp
   src/third_party/strcasecmp.h
   src/third_party/strtonum.h
+  src/third_party/utf8_decode.c
   src/third_party/utf8_decode.h
   ${REMK_PORTABLE_SOURCES}
 )

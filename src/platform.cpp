@@ -571,7 +571,7 @@ Context::~Context() noexcept {}
         // unreasonably large value because of the leading `1`. I seem to recall
         // something like that happened to me in 2006 with a PPC, but too much
         // time has passed. If I'm wrong we can change this in the future.
-        (void)utf8_decode(&state, &ignored, (unsigned char)ch);
+        (void)remk_platform_utf8_decode(&state, &ignored, (unsigned char)ch);
         if (state == UTF8_REJECT) {
             return false;
         }
