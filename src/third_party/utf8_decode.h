@@ -38,7 +38,7 @@ utf8_decode(uint32_t *state, uint32_t *codep, uint32_t byte) {
     (0xff >> type) & (byte);
 
   uint32_t off = 256 + *state * 16 + type;
-  assert(off < sizeof (utf8d) / sizeof (utf8d[0]));
+  assert(off >= 0xff && off < sizeof (utf8d) / sizeof (utf8d[0]));
   *state = utf8d[off];
   return *state;
 }
