@@ -525,9 +525,9 @@ Context::~Context() noexcept {}
         return "network_unreachable";
     case REMK_PLATFORM_ERROR_NAME(NOBUFS):
         return "no_buffer_space";
-    case REMK_PLATFORM_ERROR_NAME(NOMEM):
+#if !defined _WIN32 // ENOMEM, EPIPE not be available on Windows
+    case ENOMEM:
         return "not_enough_memory";
-#if !defined _WIN32 // EPIPE not be available on Windows
     case EPIPE:
         return "broken_pipe";
 #endif
