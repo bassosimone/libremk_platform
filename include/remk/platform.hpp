@@ -211,6 +211,11 @@ class Context : public LoggerAndEmitterMixin,
     virtual int wsainit() noexcept;
 
     virtual ~Context() noexcept;
+
+    /* Classify system error by mapping it into the corresponding error
+       string as defined by Measurement Kit net/error.hpp. The error strings
+       are consistent with C++ standard library's std::errc enum. */
+    static std::string classify_system_error(int system_error) noexcept;
 };
 
 class DeferClosesocket {

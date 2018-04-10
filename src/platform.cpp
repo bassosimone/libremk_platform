@@ -494,6 +494,53 @@ int Context::wsainit() noexcept {
 
 Context::~Context() noexcept {}
 
+/*static*/ std::string classify_system_error(int system_error) {
+#if !defined _WIN32 && EWOUDLBLOCK != EAGAIN // Theoretically possible
+    if (system_error == EAGAIN) {
+        system_error = EWOULDBLOCK;
+    }
+#endif
+    switch (system_error) {
+    case REMK_PLATFORM_ERROR_NAME(ALREADY):
+        return "connection_already_in_progress";
+    case REMK_PLATFORM_ERROR_NAME(CONNABORTED):
+        return "connection_aborted";
+    case REMK_PLATFORM_ERROR_NAME(CONNREFUSED):
+        return "connection_refused";
+    case REMK_PLATFORM_ERROR_NAME(CONNRESET):
+        return "connection_reset";
+    case REMK_PLATFORM_ERROR_NAME(HOSTUNREACH):
+        return "host_unreachable";
+    case REMK_PLATFORM_ERROR_NAME(INPROGRESS):
+        return "operation_in_progress";
+    case REMK_PLATFORM_ERROR_NAME(INTR):
+        return "interrupted";
+    case REMK_PLATFORM_ERROR_NAME(INVAL):
+        return "invalid_argument";
+    case REMK_PLATFORM_ERROR_NAME(NETDOWN):
+        return "network_down";
+    case REMK_PLATFORM_ERROR_NAME(NETRESET):
+        return "network_reset";
+    case REMK_PLATFORM_ERROR_NAME(NETUNREACH):
+        return "network_unreachable";
+    case REMK_PLATFORM_ERROR_NAME(NOBUFS):
+        return "no_buffer_space";
+    case REMK_PLATFORM_ERROR_NAME(NOMEM):
+        return "not_enough_memory";
+#if !defined _WIN32 // EPIPE not be available on Windows
+    case EPIPE:
+        return "broken_pipe";
+#endif
+    case REMK_PLATFORM_ERROR_NAME(TIMEDOUT):
+        return "timed_out";
+    case REMK_PLATFORM_ERROR_NAME(WOULDBLOCK):
+        return "operation_would_block";
+    }
+    std::stringstream ss;
+    ss << "unknown_system_error " << system_error;
+    return ss.str();
+}
+
 DeferClosesocket::DeferClosesocket(Context *ctx, Socket sock) noexcept
     : ctx_{ctx}, sock_{sock} {}
 
