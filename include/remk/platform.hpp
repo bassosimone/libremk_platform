@@ -169,7 +169,7 @@ class SystemMixin {
     virtual ~SystemMixin() noexcept;
 };
 
-class Context : public LoggerMixin, public SystemMixin {
+class Context : public LoggerMixin, public SettingsMixin, public SystemMixin {
   public:
     virtual double now() noexcept;
 
