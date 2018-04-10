@@ -94,7 +94,7 @@ class LoggerAndEmitterMixin {
   public:
     virtual void emit_event(Event event) noexcept;
 
-    virtual void emit_log(int level, const std::stringstream &ss) noexcept;
+    void emit_log(int level, const std::stringstream &ss) noexcept;
 
     int get_log_level() noexcept { return level_; }
 
