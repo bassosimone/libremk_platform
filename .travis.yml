@@ -5,17 +5,17 @@ dist: trusty
 addons:
   apt:
     packages:
-      - g++-6
+      - g++-7
     sources:
       - ubuntu-toolchain-r-test
 
 matrix:
   include:
     - os: linux
-      compiler: gcc-6
+      compiler: gcc-7
 
 script:
-  - export CXX=g++-6
+  - export CXX=g++-7
   - mkdir x
   - cd x
   - cmake ..

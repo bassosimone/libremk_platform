@@ -16,8 +16,12 @@
 #include <unistd.h>
 #endif
 
+#include <stdint.h>
 #include <time.h>
 
+#include <any>
+#include <map>
+#include <optional>
 #include <sstream>
 #include <string>
 
@@ -57,6 +61,24 @@ using Size = size_t;
 using Socklen = socklen_t;
 using Ssize = ssize_t;
 #endif
+
+class SettingsMixin {
+  public:
+    void set_value_double(const char *name, double value) noexcept;
+
+    std::optional<double> get_value_double(const char *name) noexcept;
+
+    void set_value_int(const char *name, int64_t value) noexcept;
+
+    std::optional<int64_t> get_value_int(const char *name) noexcept;
+
+    void set_value_string(const char *name, std::string value) noexcept;
+
+    std::optional<std::string> get_value_string(const char *name) noexcept;
+
+  private:
+    std::map<std::string, std::any> values_;
+};
 
 class LoggerMixin {
   public:
@@ -147,7 +169,7 @@ class SystemMixin {
     virtual ~SystemMixin() noexcept;
 };
 
-class Context : public LoggerMixin, public SystemMixin {
+class Context : public LoggerMixin, public SettingsMixin, public SystemMixin {
   public:
     virtual double now() noexcept;
 
