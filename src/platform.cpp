@@ -20,8 +20,8 @@ void SettingsMixin::set_value_double(const char *name, double value) noexcept {
     values_[name] = value;
 }
 
-std::optional<double>
-SettingsMixin::get_value_double(const char *name) noexcept {
+std::optional<double> SettingsMixin::get_value_double(
+      const char *name) noexcept {
     std::optional<double> value;
     try {
         value = std::any_cast<double>(values_.at(name));
@@ -49,13 +49,13 @@ std::optional<int64_t> SettingsMixin::get_value_int(const char *name) noexcept {
     return value;
 }
 
-void
-SettingsMixin::set_value_string(const char *name, std::string value) noexcept {
+void SettingsMixin::set_value_string(
+      const char *name, std::string value) noexcept {
     values_[name] = std::move(value);
 }
 
-std::optional<std::string>
-SettingsMixin::get_value_string(const char *name) noexcept {
+std::optional<std::string> SettingsMixin::get_value_string(
+      const char *name) noexcept {
     std::optional<std::string> value;
     try {
         value = std::any_cast<std::string>(values_.at(name));
@@ -414,7 +414,7 @@ Socket Context::connect_tcp(const char *hostname, const char *port) noexcept {
 }
 
 Ssize Context::readn(
-          Socket handle, void *buffer, Size count, int flags) noexcept {
+      Socket handle, void *buffer, Size count, int flags) noexcept {
     Ssize retval = 0;
     Size off = 0;
     while (off < count) {
@@ -450,7 +450,7 @@ Ssize Context::readn(
 }
 
 Ssize Context::writen(
-          Socket handle, const void *buffer, Size count, int flags) noexcept {
+      Socket handle, const void *buffer, Size count, int flags) noexcept {
     Ssize retval = 0;
     Size off = 0;
     while (off < count) {
