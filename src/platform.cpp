@@ -8,6 +8,7 @@
 #include <limits.h>
 #include <string.h>
 
+#include <chrono>
 #include <iomanip>
 #include <iostream>
 #include <memory>
@@ -102,25 +103,6 @@ void LoggerAndEmitterMixin::emit_log(
 }
 
 LoggerAndEmitterMixin::~LoggerAndEmitterMixin() noexcept {}
-
-// TODO(bassosimone): see whether we can use a monotonic clock here.
-int SystemMixin::timespec_get(timespec *ts, int base) noexcept {
-#ifdef _WIN32
-    return ::timespec_get(ts, base);
-#else
-    if (ts == nullptr || base != TIME_UTC) {
-        errno = EINVAL;
-        return 0;
-    }
-    timeval tv{};
-    if (::gettimeofday(&tv, nullptr) != 0) {
-        return 0;
-    }
-    ts->tv_sec = tv.tv_sec;
-    ts->tv_nsec = tv.tv_usec * 1'000;
-    return TIME_UTC;
-#endif
-}
 
 int SystemMixin::get_last_error() noexcept {
 #ifdef _WIN32
@@ -297,13 +279,10 @@ Ssize SystemMixin::writev(
 
 SystemMixin::~SystemMixin() noexcept {}
 
-double Context::now() noexcept {
-    timespec ts{};
-    auto rv = this->timespec_get(&ts, TIME_UTC);
-    if (rv != TIME_UTC) {
-        return -1.0;
-    }
-    return (double)ts.tv_sec + (double)ts.tv_nsec / 1'000'000'000;
+double Context::steady_clock_now() noexcept {
+    auto now = std::chrono::steady_clock::now();
+    auto usec = std::chrono::time_point_cast<std::chrono::microseconds>(now);
+    return usec.time_since_epoch().count() / (double)1'000'000;
 }
 
 int Context::setnonblocking(Socket sock, bool enable) noexcept {

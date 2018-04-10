@@ -12,6 +12,7 @@ int main() {
         REMK_PLATFORM_WARN(ctx, "wsainit");
         exit(EXIT_FAILURE);
     }
+    auto begin = ctx->steady_clock_now();
     auto sock = ctx->connect_tcp("www.google.com", "80");
     if (sock == -1) {
         exit(EXIT_FAILURE);
@@ -32,5 +33,7 @@ int main() {
     }
     buffer[(size_t)nbytes] = '\0';
     REMK_PLATFORM_INFOX(ctx, "recv: nbytes=" << nbytes << " data=" << buffer);
+    auto end = ctx->steady_clock_now();
+    REMK_PLATFORM_INFOX(ctx, "elapsed time: " << end - begin);
     exit(EXIT_SUCCESS);
 }

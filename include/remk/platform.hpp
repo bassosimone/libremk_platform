@@ -25,10 +25,6 @@
 #include <sstream>
 #include <string>
 
-#ifndef TIME_UTC
-#define TIME_UTC 1
-#endif
-
 #ifdef _WIN32
 struct iovec {
     void *iov_base;
@@ -112,8 +108,6 @@ class LoggerAndEmitterMixin {
 
 class SystemMixin {
   public:
-    virtual int timespec_get(timespec *ts, int base) noexcept;
-
     virtual int get_last_error() noexcept;
 
     virtual void set_last_error(int error_code) noexcept;
@@ -189,7 +183,7 @@ class Context : public LoggerAndEmitterMixin,
                 public SettingsMixin,
                 public SystemMixin {
   public:
-    virtual double now() noexcept;
+    virtual double steady_clock_now() noexcept;
 
     virtual int setnonblocking(Socket handle, bool enable) noexcept;
 
