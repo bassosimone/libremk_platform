@@ -25,7 +25,7 @@ matrix:
 script:
   - |
     if [ "$BUILD_TYPE" = "coverage" ]; then
-      pip install cpp-coveralls
+      pip install --user cpp-coveralls
     fi
   - export CXX=g++-7
   - mkdir x
