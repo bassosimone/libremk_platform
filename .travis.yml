@@ -1,40 +1,26 @@
 language: c++
-sudo: false
-dist: trusty
-
-addons:
-  apt:
-    packages:
-      - g++-7
-      - python-pip
-    sources:
-      - ubuntu-toolchain-r-test
 
 matrix:
   include:
+
     - os: linux
       compiler: gcc-7
       env: BUILD_TYPE="vanilla"
+      script:
+        - ./.ci/docker/script/docker-run bassosimone/mk-debian:testing cmake
+      services:
+        - docker
+      sudo: required
+
     - os: linux
       compiler: gcc-7
       env: BUILD_TYPE="coverage"
            CFLAGS="-O0 -g -fprofile-arcs -ftest-coverage"
+           COVERALLS_OPTIONS="--include include --include src --include example"
            CXXFLAGS="-O0 -g -fprofile-arcs -ftest-coverage"
            LDFLAGS="-lgcov"
-
-script:
-  - |
-    if [ "$BUILD_TYPE" = "coverage" ]; then
-      pip install --user cpp-coveralls
-    fi
-  - export CXX=g++-7
-  - mkdir x
-  - cd x
-  - cmake ..
-  - make
-  - ./example/http_client
-  - |
-    if [ "$BUILD_TYPE" = "coverage" ]; then
-      $HOME/.local/bin/coveralls --gcov-options '\-lp' --gcov gcov-7           \
-                                 --build-root . > /dev/null
-    fi
+      script:
+        - ./.ci/docker/script/docker-run bassosimone/mk-debian:testing cmake
+      services:
+        - docker
+      sudo: required
