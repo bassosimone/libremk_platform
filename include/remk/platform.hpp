@@ -176,6 +176,13 @@ class SystemMixin {
 
     virtual Ssize writev(Socket socket, const iovec *iov, int iovcnt) noexcept;
 
+    virtual long long strtonum(const char *numstr, long long minval,
+          long long maxval, const char **errstrp) noexcept;
+
+    virtual int strcasecmp(const char *s1, const char *s2) noexcept;
+
+    virtual int strncasecmp(const char *s1, const char *s2, size_t n) noexcept;
+
     virtual ~SystemMixin() noexcept;
 };
 

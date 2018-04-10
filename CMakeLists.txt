@@ -1,23 +1,50 @@
 cmake_minimum_required(VERSION 3.1.0)
-project(remk_platform CXX)
+project(remk_platform LANGUAGES C CXX)
+
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
 set(REMK_PLATFORM_ABI_MAJOR 4)
 set(REMK_PLATFORM_ABI_MINOR 0)
 set(REMK_PLATFORM_ABI_PATCH 0)
 set(REMK_PLATFORM_ABI ${REMK_PLATFORM_ABI_MAJOR}.${REMK_PLATFORM_ABI_MINOR}.${REMK_PLATFORM_ABI_PATCH})
-if(UNIX)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -pedantic")
+
+include(CheckIncludeFiles)
+include(CheckFunctionExists)
+include(CheckLibraryExists)
+
+# Assumption: if there is no strcasecmp() there is no strncasecmp().
+check_function_exists(strcasecmp HAVE_STRCASECMP)
+if(NOT (${HAVE_STRCASECMP}))
+  list(APPEND REMK_PORTABLE_SOURCES "src/third_party/strcasecmp.c")
+endif()
+
+check_function_exists(strtonum HAVE_STRTONUM)
+if(NOT (${HAVE_STRTONUM}))
+  list(APPEND REMK_PORTABLE_SOURCES "src/third_party/strtonum.c")
+endif()
+
+if(${UNIX})
+  set(REMK_FLAGS "-Wall -Wextra -Werror -pedantic")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${REMK_FLAGS} -Wmissing-prototypes")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${REMK_FLAGS}")
   if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    # for GCC, -Wmissing-prototypes only works for C/ObjC.
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wmissing-prototypes")
   endif()
 endif()
+
 add_library(
   remk_platform
   include/remk/platform.hpp
   src/platform.cpp
+  src/third_party/strcasecmp.h
+  src/third_party/strtonum.h
+  src/third_party/utf8_decode.c
   src/third_party/utf8_decode.h
+  ${REMK_PORTABLE_SOURCES}
 )
 target_include_directories(
   remk_platform
@@ -46,4 +73,5 @@ install(
 if(WIN32)
   target_link_libraries(remk_platform ws2_32)
 endif()
+
 add_subdirectory(example)

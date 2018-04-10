@@ -14,6 +14,8 @@
 #include <memory>
 #include <sstream>
 
+#include "src/third_party/strcasecmp.h"
+#include "src/third_party/strtonum.h"
 #include "src/third_party/utf8_decode.h"
 
 namespace remk {
@@ -277,6 +279,20 @@ Ssize SystemMixin::writev(
 #else
     return this->system_writev(socket, iov, iovcnt);
 #endif
+}
+
+long long SystemMixin::strtonum(const char *numstr, long long minval,
+      long long maxval, const char **errstrp) noexcept {
+    return ::strtonum(numstr, minval, maxval, errstrp);
+}
+
+int SystemMixin::strcasecmp(const char *s1, const char *s2) noexcept {
+    return ::strcasecmp(s1, s2);
+}
+
+int SystemMixin::strncasecmp(
+      const char *s1, const char *s2, size_t n) noexcept {
+    return ::strncasecmp(s1, s2, n);
 }
 
 SystemMixin::~SystemMixin() noexcept {}
@@ -555,7 +571,7 @@ Context::~Context() noexcept {}
         // unreasonably large value because of the leading `1`. I seem to recall
         // something like that happened to me in 2006 with a PPC, but too much
         // time has passed. If I'm wrong we can change this in the future.
-        (void)utf8_decode(&state, &ignored, (unsigned char)ch);
+        (void)remk_platform_utf8_decode(&state, &ignored, (unsigned char)ch);
         if (state == UTF8_REJECT) {
             return false;
         }
