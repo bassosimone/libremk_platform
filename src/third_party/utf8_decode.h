@@ -1,6 +1,10 @@
 // Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
 // See http://bjoern.hoehrmann.de/utf-8/decoder/dfa/ for details.
 
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
 #define UTF8_ACCEPT 0
 #define UTF8_REJECT 1
 
@@ -22,13 +26,19 @@ static const uint8_t utf8d[] = {
 };
 
 uint32_t inline
-decode(uint32_t* state, uint32_t* codep, uint32_t byte) {
+utf8_decode(uint32_t *state, uint32_t *codep, uint32_t byte) {
+  assert(state != NULL && codep != NULL);
+  assert(*state == UTF8_ACCEPT || *state == UTF8_REJECT);
+  assert(byte <= 0xff);
+
   uint32_t type = utf8d[byte];
 
   *codep = (*state != UTF8_ACCEPT) ?
     (byte & 0x3fu) | (*codep << 6) :
     (0xff >> type) & (byte);
 
-  *state = utf8d[256 + *state*16 + type];
+  uint32_t off = 256 + *state * 16 + type;
+  assert(off < sizeof (utf8d) / sizeof (utf8d[0]));
+  *state = utf8d[off];
   return *state;
 }
