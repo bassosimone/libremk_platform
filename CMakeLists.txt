@@ -74,4 +74,5 @@ if(WIN32)
   target_link_libraries(remk_platform ws2_32)
 endif()
 
+enable_testing()
 add_subdirectory(example)

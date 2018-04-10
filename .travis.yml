@@ -1,23 +1,24 @@
 language: c++
-sudo: false
-dist: trusty
-
-addons:
-  apt:
-    packages:
-      - g++-7
-    sources:
-      - ubuntu-toolchain-r-test
 
 matrix:
   include:
-    - os: linux
-      compiler: gcc-7
 
-script:
-  - export CXX=g++-7
-  - mkdir x
-  - cd x
-  - cmake ..
-  - make
-  - ./example/http_client
+    - os: linux
+      env: BUILD_TYPE="vanilla"
+      script:
+        - ./.ci/docker/script/docker-run bassosimone/mk-debian:testing cmake
+      services:
+        - docker
+      sudo: required
+
+    - os: linux
+      env: BUILD_TYPE="coverage"
+           CFLAGS="-O0 -g -fprofile-arcs -ftest-coverage"
+           COVERALLS_OPTIONS="--include include --include src --include example"
+           CXXFLAGS="-O0 -g -fprofile-arcs -ftest-coverage"
+           LDFLAGS="-lgcov"
+      script:
+        - ./.ci/docker/script/docker-run bassosimone/mk-debian:testing cmake
+      services:
+        - docker
+      sudo: required
