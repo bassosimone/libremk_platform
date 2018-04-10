@@ -6,18 +6,35 @@ addons:
   apt:
     packages:
       - g++-7
+      - python-pip
     sources:
       - ubuntu-toolchain-r-test
 
 matrix:
   include:
     - os: linux
+      environ: BUILD_TYPE="vanilla"
+      compiler: gcc-7
+    - os: linux
+      environ: BUILD_TYPE="coverage"
+               CFLAGS="-O0 -g -fprofile-arcs -ftest-coverage"
+               CXXFLAGS="-O0 -g -fprofile-arcs -ftest-coverage"
+               LDFLAGS="-lgcov"
       compiler: gcc-7
 
 script:
+  - |
+    if [ "$BUILD_TYPE" = "coverage" ]; then
+      pip install cpp-coveralls
+    fi
   - export CXX=g++-7
   - mkdir x
   - cd x
   - cmake ..
   - make
   - ./example/http_client
+  - |
+    if [ "$BUILD_TYPE" = "coverage" ]; then
+      $HOME/.local/bin/coveralls --gcov-options '\-lp' --gcov gcov-7           \
+                                 --build-root . > /dev/null
+    fi
