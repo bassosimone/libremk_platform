@@ -80,15 +80,31 @@ class SettingsMixin {
     std::map<std::string, std::any> values_;
 };
 
-class LoggerMixin {
+class Event {
   public:
+    std::string name;
+    std::any value;
+};
+
+#define REMK_LOG_EVENT_NAME "log"
+
+class LogEventValue {
+  public:
+    int level = REMK_PLATFORM_LOG_DEBUG;
+    std::string message;
+};
+
+class LoggerAndEmitterMixin {
+  public:
+    virtual void emit_event(Event event) noexcept;
+
     virtual void emit_log(int level, const std::stringstream &ss) noexcept;
 
     int get_log_level() noexcept { return level_; }
 
     void set_log_level(int level) noexcept { level_ = level; }
 
-    virtual ~LoggerMixin() noexcept;
+    virtual ~LoggerAndEmitterMixin() noexcept;
 
   private:
     int level_ = REMK_PLATFORM_LOG_DEBUG;
@@ -169,7 +185,9 @@ class SystemMixin {
     virtual ~SystemMixin() noexcept;
 };
 
-class Context : public LoggerMixin, public SettingsMixin, public SystemMixin {
+class Context : public LoggerAndEmitterMixin,
+                public SettingsMixin,
+                public SystemMixin {
   public:
     virtual double now() noexcept;
 

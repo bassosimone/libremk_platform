@@ -67,8 +67,14 @@ std::optional<std::string> SettingsMixin::get_value_string(
     return value;
 }
 
-void LoggerMixin::emit_log(int level, const std::stringstream &ss) noexcept {
-    switch (level) {
+void LoggerAndEmitterMixin::emit_event(Event ev) noexcept {
+    if (ev.name != REMK_LOG_EVENT_NAME) {
+        std::clog << "[!] unsupported event: " << ev.name << std::endl;
+        return;
+    }
+    // Note: failure to perform the any_cast is a programmer error
+    auto value = std::move(std::any_cast<LogEventValue>(std::move(ev.value)));
+    switch (value.level) {
     case REMK_PLATFORM_LOG_WARNING:
         std::clog << "[!] ";
         break;
@@ -81,10 +87,21 @@ void LoggerMixin::emit_log(int level, const std::stringstream &ss) noexcept {
         std::clog << "[?] ";
         break;
     }
-    std::clog << ss.str() << std::endl;
+    std::clog << value.message << std::endl;
 }
 
-LoggerMixin::~LoggerMixin() noexcept {}
+void LoggerAndEmitterMixin::emit_log(
+      int level, const std::stringstream &ss) noexcept {
+    Event ev;
+    ev.name = REMK_LOG_EVENT_NAME;
+    LogEventValue value;
+    value.message = ss.str();
+    value.level = level;
+    ev.value = std::move(value);
+    emit_event(std::move(ev));
+}
+
+LoggerAndEmitterMixin::~LoggerAndEmitterMixin() noexcept {}
 
 // TODO(bassosimone): see whether we can use a monotonic clock here.
 int SystemMixin::timespec_get(timespec *ts, int base) noexcept {
