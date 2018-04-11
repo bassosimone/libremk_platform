@@ -5,7 +5,7 @@ matrix:
 
     - os: linux
       env: BUILD_TYPE="vanilla"
-           CMAKE_OPTIONS="-D BUILD_TYPE=Release"
+           CMAKE_OPTIONS="-D CMAKE_BUILD_TYPE=Release"
            VERBOSE=1
       script:
         - ./.ci/docker/script/docker-run bassosimone/mk-debian:testing cmake
@@ -15,7 +15,7 @@ matrix:
 
     - os: linux
       env: BUILD_TYPE="vanilla"
-           CMAKE_OPTIONS="-D BUILD_TYPE=Release"
+           CMAKE_OPTIONS="-D CMAKE_BUILD_TYPE=Release"
            CXXFLAGS="-stdlib=libc++"
            MK_CC=clang
            MK_CXX=clang++
