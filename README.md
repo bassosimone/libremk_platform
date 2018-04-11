@@ -4,7 +4,7 @@
 [![Travis Build Status](https://travis-ci.org/bassosimone/libremk_platform.svg?branch=master)](https://travis-ci.org/bassosimone/libremk_platform) [![Appveyor Win32 Build Status](https://ci.appveyor.com/api/projects/status/github/bassosimone/libremk_platform?branch=master&svg=true)](https://ci.appveyor.com/project/bassosimone/libremk-platform) [![Coverage Status](https://coveralls.io/repos/github/bassosimone/libremk_platform/badge.svg?branch=master)](https://coveralls.io/github/bassosimone/libremk_platform?branch=master)
 
 The platform is the layer of code on which Measurement Kit is based. The main and only
-header is `<remk/platform.hpp>`. The core object is `remk:;platform::Context`. It is
+header is `<remk/platform.hpp>`. The core class is `remk::platform::Context`. It is
 a C++17 class that allows to:
 
 1. Write portable networking code because the Windows/Unix differences are
