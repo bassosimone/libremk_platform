@@ -14,7 +14,7 @@ a C++17 class that allows to:
    all platforms. Where possible the API is the same that you would use on
    Unix, except for some cases where that is not possible (e.g. the above
    mentioned function to get the last error that occurred, which is patterned
-   after the Windows API because there is no `errno` on Windows).
+   after the Windows API because `errno` on Windows behaves differently).
 
 2. Mock most of its API for measurement or testing purposes. Most of its APIs
    are virtual methods. By overriding these methods, you can construct test
