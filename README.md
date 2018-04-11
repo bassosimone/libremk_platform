@@ -5,7 +5,7 @@
 
 The platform is the layer of code on which Measurement Kit is based. The main
 header is `<remk/platform/platform.hpp>`. The core class defined by such header
-is `remk::platform::Context`. It is a C++17 class that allows to:
+is `remk::platform::Context`. It is a C++14 class that allows to:
 
 1. Write portable networking code because the Windows/Unix differences are
    taken into account by its API. For example, you can obtain the last error
