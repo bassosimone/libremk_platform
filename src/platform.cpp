@@ -96,14 +96,22 @@ bool SettingsMixin::get_value_string(
     return true;
 }
 
+EventValue::~EventValue() noexcept {}
+LogEventValue::~LogEventValue() noexcept {}
+
 void LoggerAndEmitterMixin::emit_event(Event ev) noexcept {
     if (ev.name != REMK_LOG_EVENT_NAME) {
         std::clog << "[!] unsupported event: " << ev.name << std::endl;
         return;
     }
-    // Note: failure to perform the any_cast is a programmer error
-    auto value = std::move(std::any_cast<LogEventValue>(std::move(ev.value)));
-    switch (value.level) {
+    // Note: failure to perform the cast implies a programmer error
+    auto value = std::dynamic_pointer_cast<LogEventValue>(std::move(ev.value));
+    if (!value) {
+        assert(false);
+        abort();
+        // NOTREACHED
+    }
+    switch (value->level) {
     case REMK_PLATFORM_LOG_WARNING:
         std::clog << "[!] ";
         break;
@@ -116,17 +124,18 @@ void LoggerAndEmitterMixin::emit_event(Event ev) noexcept {
         std::clog << "[?] ";
         break;
     }
-    std::clog << value.message << std::endl;
+    std::clog << value->message << std::endl;
 }
 
 void LoggerAndEmitterMixin::emit_log(
       int level, const std::stringstream &ss) noexcept {
     Event ev;
     ev.name = REMK_LOG_EVENT_NAME;
-    LogEventValue value;
-    value.message = ss.str();
-    value.level = level;
+    auto value = std::make_shared<LogEventValue>();
+    value->message = ss.str();
+    value->level = level;
     ev.value = std::move(value);
+    assert(!!ev.value);
     emit_event(std::move(ev));
 }
 

@@ -19,8 +19,8 @@
 #include <stdint.h>
 #include <time.h>
 
-#include <any>
 #include <map>
+#include <memory>
 #include <sstream>
 #include <string>
 
@@ -87,18 +87,24 @@ class SettingsMixin {
     std::map<std::string, SettingsValue> values_;
 };
 
+class EventValue {
+  public:
+    virtual ~EventValue() noexcept;
+};
+
 class Event {
   public:
     std::string name;
-    std::any value;
+    std::shared_ptr<EventValue> value;
 };
 
 #define REMK_LOG_EVENT_NAME "log"
 
-class LogEventValue {
+class LogEventValue : public EventValue {
   public:
     int level = REMK_PLATFORM_LOG_DEBUG;
     std::string message;
+    virtual ~LogEventValue() noexcept;
 };
 
 class LoggerAndEmitterMixin {
