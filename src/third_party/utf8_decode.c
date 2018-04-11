@@ -27,7 +27,6 @@ static const uint8_t utf8d[] = {
 uint32_t remk_platform_utf8_decode(
     uint32_t *state, uint32_t *codep, uint32_t byte) {
   assert(state != NULL && codep != NULL);
-  assert(*state == UTF8_ACCEPT || *state == UTF8_REJECT);
   assert(byte <= 0xff);
   uint32_t type = utf8d[byte];
   *codep = (*state != UTF8_ACCEPT) ?
