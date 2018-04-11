@@ -21,7 +21,7 @@
 #include <limits.h>
 #include <stdlib.h>
 
-#include "src/third_party/strtonum.h"
+#include "src/strtonum.h"
 
 #define	INVALID		1
 #define	TOOSMALL	2

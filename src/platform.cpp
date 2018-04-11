@@ -14,9 +14,9 @@
 #include <memory>
 #include <sstream>
 
-#include "src/third_party/strcasecmp.h"
-#include "src/third_party/strtonum.h"
-#include "src/third_party/utf8_decode.h"
+#include "src/strcasecmp.h"
+#include "src/strtonum.h"
+#include "src/utf8_decode.h"
 
 namespace remk {
 namespace platform {

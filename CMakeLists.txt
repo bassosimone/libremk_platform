@@ -18,12 +18,12 @@ include(CheckLibraryExists)
 # Assumption: if there is no strcasecmp() there is no strncasecmp().
 check_function_exists(strcasecmp HAVE_STRCASECMP)
 if(NOT (${HAVE_STRCASECMP}))
-  list(APPEND REMK_PORTABLE_SOURCES "src/third_party/strcasecmp.c")
+  list(APPEND REMK_PORTABLE_SOURCES "src/strcasecmp.c")
 endif()
 
 check_function_exists(strtonum HAVE_STRTONUM)
 if(NOT (${HAVE_STRTONUM}))
-  list(APPEND REMK_PORTABLE_SOURCES "src/third_party/strtonum.c")
+  list(APPEND REMK_PORTABLE_SOURCES "src/strtonum.c")
 endif()
 
 if(${UNIX})
@@ -40,10 +40,10 @@ add_library(
   remk_platform
   include/remk/platform.hpp
   src/platform.cpp
-  src/third_party/strcasecmp.h
-  src/third_party/strtonum.h
-  src/third_party/utf8_decode.c
-  src/third_party/utf8_decode.h
+  src/strcasecmp.h
+  src/strtonum.h
+  src/utf8_decode.c
+  src/utf8_decode.h
   ${REMK_PORTABLE_SOURCES}
 )
 target_include_directories(

@@ -31,7 +31,7 @@
 
 #include <string.h>
 
-#include "src/third_party/strcasecmp.h"
+#include "src/strcasecmp.h"
 
 typedef unsigned char u_char;
 
