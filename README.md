@@ -1,6 +1,6 @@
 # Really Experimental MK platform
 
-[![Travis Build Status](https://travis-ci.org/bassosimone/libremk_platform.svg?branch=master)](https://travis-ci.org/bassosimone/libremk_platform) [![Appveyor Win32 Build Status](https://ci.appveyor.com/api/projects/status/github/bassosimone/libremk_platform?branch=master&svg=true)](https://ci.appveyor.com/project/bassosimone/libremk-platform)
+[![Travis Build Status](https://travis-ci.org/bassosimone/libremk_platform.svg?branch=master)](https://travis-ci.org/bassosimone/libremk_platform) [![Appveyor Win32 Build Status](https://ci.appveyor.com/api/projects/status/github/bassosimone/libremk_platform?branch=master&svg=true)](https://ci.appveyor.com/project/bassosimone/libremk-platform) [![Coverage Status](https://coveralls.io/repos/github/bassosimone/libremk_platform/badge.svg?branch=master)](https://coveralls.io/github/bassosimone/libremk_platform?branch=master)
 
 The purpose of this repository is to provide portable, hookable replacements for
 common socket and related APIs. The objective is to provide a common API
