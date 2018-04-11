@@ -57,6 +57,18 @@ using Socklen = socklen_t;
 using Ssize = ssize_t;
 #endif
 
+enum class SettingsType {
+    DOUBLE_SETTING,
+    INT_SETTING,
+    STRING_SETTING
+};
+
+class SettingsValue {
+  public:
+    SettingsType t;
+    std::string v;
+};
+
 class SettingsMixin {
   public:
     void set_value_double(const char *name, double value) noexcept;
@@ -72,7 +84,7 @@ class SettingsMixin {
     bool get_value_string(const char *name, std::string *value) noexcept;
 
   private:
-    std::map<std::string, std::any> values_;
+    std::map<std::string, SettingsValue> values_;
 };
 
 class Event {

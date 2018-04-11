@@ -22,36 +22,52 @@ namespace remk {
 namespace platform {
 
 void SettingsMixin::set_value_double(const char *name, double value) noexcept {
-    values_[name] = value;
+    if (name != nullptr) {
+        SettingsValue v;
+        v.v = std::to_string(value);
+        v.t = SettingsType::DOUBLE_SETTING;
+        values_[name] = std::move(v);
+    }
 }
 
 bool SettingsMixin::get_value_double(const char *name, double *value) noexcept {
-    if (name == nullptr || value == nullptr) {
+    if (name == nullptr || value == nullptr || values_.count(name) <= 0) {
         return false;
     }
-    try {
-        *value = std::any_cast<double>(values_.at(name));
-    } catch (const std::out_of_range &) {
+    auto &v = values_.at(name);
+    if (v.t != SettingsType::DOUBLE_SETTING) {
         return false;
-    } catch (const std::bad_any_cast &) {
+    }
+    std::stringstream ss;
+    ss << v.v;
+    ss >> *value;
+    if (!ss.eof() || ss.bad()) {
         return false;
     }
     return true;
 }
 
 void SettingsMixin::set_value_int(const char *name, int64_t value) noexcept {
-    values_[name] = value;
+    if (name != nullptr) {
+        SettingsValue v;
+        v.v = std::to_string(value);
+        v.t = SettingsType::INT_SETTING;
+        values_[name] = std::move(v);
+    }
 }
 
 bool SettingsMixin::get_value_int(const char *name, int64_t *value) noexcept {
-    if (name == nullptr || value == nullptr) {
+    if (name == nullptr || value == nullptr || values_.count(name) <= 0) {
         return false;
     }
-    try {
-        *value = std::any_cast<int64_t>(values_.at(name));
-    } catch (const std::out_of_range &) {
+    auto &v = values_.at(name);
+    if (v.t != SettingsType::INT_SETTING) {
         return false;
-    } catch (const std::bad_any_cast &) {
+    }
+    std::stringstream ss;
+    ss << v.v;
+    ss >> *value;
+    if (!ss.eof() || ss.bad()) {
         return false;
     }
     return true;
@@ -59,21 +75,24 @@ bool SettingsMixin::get_value_int(const char *name, int64_t *value) noexcept {
 
 void SettingsMixin::set_value_string(
       const char *name, std::string value) noexcept {
-    values_[name] = std::move(value);
+    if (name != nullptr) {
+        SettingsValue v;
+        std::swap(v.v, value);
+        v.t = SettingsType::STRING_SETTING;
+        values_[name] = std::move(v);
+    }
 }
 
 bool SettingsMixin::get_value_string(
       const char *name, std::string *value) noexcept {
-    if (name == nullptr || value == nullptr) {
+    if (name == nullptr || value == nullptr || values_.count(name) <= 0) {
         return false;
     }
-    try {
-        *value = std::any_cast<std::string>(values_.at(name));
-    } catch (const std::out_of_range &) {
-        return false;
-    } catch (const std::bad_any_cast &) {
+    auto &v = values_.at(name);
+    if (v.t != SettingsType::STRING_SETTING) {
         return false;
     }
+    *value = v.v;
     return true;
 }
 
