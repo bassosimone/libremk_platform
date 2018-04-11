@@ -1,5 +1,5 @@
-#ifndef REMK_PLATFORM_HPP
-#define REMK_PLATFORM_HPP
+#ifndef REMK_PLATFORM_PLATFORM_HPP
+#define REMK_PLATFORM_PLATFORM_HPP
 
 #ifdef _WIN32
 #include <basetsd.h>

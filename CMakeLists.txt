@@ -38,7 +38,7 @@ endif()
 
 add_library(
   remk_platform
-  include/remk/platform.hpp
+  include/remk/platform/platform.hpp
   src/platform.cpp
   src/strcasecmp.h
   src/strtonum.h
