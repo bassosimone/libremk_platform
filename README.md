@@ -1,61 +1,70 @@
 # Really Experimental MK platform
+> As the name implies, this is currently experimental code.
 
 [![Travis Build Status](https://travis-ci.org/bassosimone/libremk_platform.svg?branch=master)](https://travis-ci.org/bassosimone/libremk_platform) [![Appveyor Win32 Build Status](https://ci.appveyor.com/api/projects/status/github/bassosimone/libremk_platform?branch=master&svg=true)](https://ci.appveyor.com/project/bassosimone/libremk-platform) [![Coverage Status](https://coveralls.io/repos/github/bassosimone/libremk_platform/badge.svg?branch=master)](https://coveralls.io/github/bassosimone/libremk_platform?branch=master)
 
-The purpose of this repository is to provide portable, hookable replacements for
-common socket and related APIs. The objective is to provide a common API
-that can be used both on Unix and on Windows to implement basic networking stuff
-with the option to provide different implementations of such APIs.
+The platform is the layer of code on which Measurement Kit is based. The main and only
+header is `<remk/platform.hpp>`. The core object is `remk:;platform::Context`. It is
+a C++17 class that allows to:
 
-## Motivation
+1. Write portable networking code because the Windows/Unix differences are
+   taken into account by its API. For example, you can obtain the last error
+   that occurred by calling `ctx->get_last_error()`. It also contains some
+   useful functions like `ctx->strtonum()` that are not always available on
+   all platforms. Where possible the API is the same that you would use on
+   Unix, except for some cases where that is not possible (e.g. the above
+   mentioned function to get the last error that occurred, which is patterned
+   after the Windows API because there is no `errno` on Windows).
 
-Measurement Kit code should use this as its lowest level API. Dependencies and
-code contributed to [Measurement Kit](
-https://github.com/measurement-kit/measurement-kit) should be refactored
-&mdash; perhaps using [coccinelle](https://github.com/coccinelle/coccinelle)
-&mdash; to use the replacements provided in this library rather than the
-corresponding libc API. This means, for example, using `ctx->getaddrinfo()`
-instead of `getaddrinfo()`, where `ctx` is a pointer pointing to a
-`remk::platform::Context` instance.
+2. Mock most of its API for measurement or testing purposes. Most of its APIs
+   are virtual methods. By overriding these methods, you can construct test
+   cases or invoke other implementations of the same methods. For example, one
+   use case is replacing `ctx->getaddrinfo()` with an implementation of
+   `getaddrinfo()` based on [c-ares](https://github.com/c-ares/c-ares) that
+   collects timing and packet-content information. This allows one to write
+   network tests using the above mentioned Unix-like API, without having
+   to wonder about collecting low-level data, which can instead be collected
+   by overriding the implementation of the called methods.
 
-The usage of these replacements has three advantages:
+3. Write less code, thanks to syntactic sugar functionality, like
+   `ctx->connect_tcp()`, that perform common tasks.
 
-1. these replacements are coded with Unix / Windows portability in mind, with
-   some minor changes (e.g. using `ctx->get_last_error()` instead
-   of accessing `errno` directly), so the code can also work on Windows;
+4. Write more correct code, thanks to wrapper classes like `DeferClosesocket`
+   that guarantee that resources are cleared in a RAII fashion.
 
-2. these replacements can be mocked, allowing us, e.g., to replace
-   `getaddrinfo()` with, say, a [c-ares](https://github.com/c-ares/c-ares)-based
-   engine that stores the actual packets received and sent;
+5. Carry around configuration information in a way compatible with the current
+   implementation of Measurement Kit (see the `SettingsMixin` which is one of
+   the classes that `Context` inherits from).
 
-3. additionally, mocking allows for better testing.
+6. Log and emit other opaque events (see the `LoggerAndEmitterMixin` another
+   of the classes that `Context` inherits from).
 
-The main disadvantage is that code needs to be refactored as follows:
+7. Interrupt long waits or perform periodic actions, by overriding the
+   `ctx->select()` method properly.
 
-1. you need to carry around a `ctx` context;
+8. Write more secure code, by providing a logging interface that does not
+   use the `printf()` style of printing values.
 
-2. you need to replace calls to system networking APIs with indirect
-   calls through the `ctx` context.
+9. Classify network-related errors that we care about by mapping them onto
+   the same strings currently used by Measurement Kit.
 
-## API description
+In short, this library is the engine to write tests. To collect measurements
+and perform other actions, Measurement Kit should properly override the
+methods of this class to implement more advanced behavior.
 
-This is written in C++14. The main class is `remk::platform::Context` in
-`include/remk/platform/context.h`. It provides these functionality:
+## Expected evolution
 
-1. logging (in the `LoggerMixin` class);
-
-2. mocking of system APIs (in the `SystemMixin` class);
-
-3. syntactic sugar APIs build on top of that.
-
-The `Context` class inherits publicly from the above mentioned mixins.
+This is currently developed as a separate library to ease development. It is
+expected that this library is integrated in Measurement Kit either by vendoring
+the sources or by linking to an external repository.
 
 ## Building
 
-There are currently no dependencies apart from system headers. We use CMake
+There are no external dependencies apart from a C++17 library. We use CMake
 to build. The CMake script should perform all the platform checks.
 
-To build a static library, do:
+To build a static library, from a shell (on Unix) or a MSVC development
+prompt (on Windows), type the following commands:
 
 ```
 cmake .
@@ -74,8 +83,6 @@ On Windows, you also need to force CMake to export symbols:
 cmake -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=ON -DBUILD_SHARED_LIBS=ON ..
 ```
 
-(Make sure you're in a developer prompt, tho.)
-
 ## Examples
 
-See `example/http_client.cpp`.
+See [example/http_client.cpp](example/http_client.cpp).
