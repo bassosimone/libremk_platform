@@ -21,7 +21,6 @@
 
 #include <any>
 #include <map>
-#include <optional>
 #include <sstream>
 #include <string>
 
@@ -62,15 +61,15 @@ class SettingsMixin {
   public:
     void set_value_double(const char *name, double value) noexcept;
 
-    std::optional<double> get_value_double(const char *name) noexcept;
+    bool get_value_double(const char *name, double *value) noexcept;
 
     void set_value_int(const char *name, int64_t value) noexcept;
 
-    std::optional<int64_t> get_value_int(const char *name) noexcept;
+    bool get_value_int(const char *name, int64_t *value) noexcept;
 
     void set_value_string(const char *name, std::string value) noexcept;
 
-    std::optional<std::string> get_value_string(const char *name) noexcept;
+    bool get_value_string(const char *name, std::string *value) noexcept;
 
   private:
     std::map<std::string, std::any> values_;

@@ -25,33 +25,36 @@ void SettingsMixin::set_value_double(const char *name, double value) noexcept {
     values_[name] = value;
 }
 
-std::optional<double> SettingsMixin::get_value_double(
-      const char *name) noexcept {
-    std::optional<double> value;
-    try {
-        value = std::any_cast<double>(values_.at(name));
-    } catch (const std::out_of_range &) {
-        // Nothing
-    } catch (const std::bad_any_cast &) {
-        // Nothing
+bool SettingsMixin::get_value_double(const char *name, double *value) noexcept {
+    if (name == nullptr || value == nullptr) {
+        return false;
     }
-    return value;
+    try {
+        *value = std::any_cast<double>(values_.at(name));
+    } catch (const std::out_of_range &) {
+        return false;
+    } catch (const std::bad_any_cast &) {
+        return false;
+    }
+    return true;
 }
 
 void SettingsMixin::set_value_int(const char *name, int64_t value) noexcept {
     values_[name] = value;
 }
 
-std::optional<int64_t> SettingsMixin::get_value_int(const char *name) noexcept {
-    std::optional<int64_t> value;
-    try {
-        value = std::any_cast<int64_t>(values_.at(name));
-    } catch (const std::out_of_range &) {
-        // Nothing
-    } catch (const std::bad_any_cast &) {
-        // Nothing
+bool SettingsMixin::get_value_int(const char *name, int64_t *value) noexcept {
+    if (name == nullptr || value == nullptr) {
+        return false;
     }
-    return value;
+    try {
+        *value = std::any_cast<int64_t>(values_.at(name));
+    } catch (const std::out_of_range &) {
+        return false;
+    } catch (const std::bad_any_cast &) {
+        return false;
+    }
+    return true;
 }
 
 void SettingsMixin::set_value_string(
@@ -59,17 +62,19 @@ void SettingsMixin::set_value_string(
     values_[name] = std::move(value);
 }
 
-std::optional<std::string> SettingsMixin::get_value_string(
-      const char *name) noexcept {
-    std::optional<std::string> value;
-    try {
-        value = std::any_cast<std::string>(values_.at(name));
-    } catch (const std::out_of_range &) {
-        // Nothing
-    } catch (const std::bad_any_cast &) {
-        // Nothing
+bool SettingsMixin::get_value_string(
+      const char *name, std::string *value) noexcept {
+    if (name == nullptr || value == nullptr) {
+        return false;
     }
-    return value;
+    try {
+        *value = std::any_cast<std::string>(values_.at(name));
+    } catch (const std::out_of_range &) {
+        return false;
+    } catch (const std::bad_any_cast &) {
+        return false;
+    }
+    return true;
 }
 
 void LoggerAndEmitterMixin::emit_event(Event ev) noexcept {
