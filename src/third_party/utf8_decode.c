@@ -33,7 +33,7 @@ uint32_t remk_platform_utf8_decode(
     (byte & 0x3fu) | (*codep << 6) :
     (0xff >> type) & (byte);
   uint32_t off = 256 + *state * 16 + type;
-  assert(off >= 0xff && off < sizeof (utf8d) / sizeof (utf8d[0]));
+  assert(off > 0xff && off < sizeof (utf8d) / sizeof (utf8d[0]));
   *state = utf8d[off];
   return *state;
 }
