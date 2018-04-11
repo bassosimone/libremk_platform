@@ -1,4 +1,4 @@
-#include <remk/platform.hpp>
+#include <remk/platform/platform.hpp>
 
 #ifndef _WIN32
 #include <fcntl.h>
@@ -22,64 +22,96 @@ namespace remk {
 namespace platform {
 
 void SettingsMixin::set_value_double(const char *name, double value) noexcept {
-    values_[name] = value;
+    if (name != nullptr) {
+        SettingsValue v;
+        v.v = std::to_string(value);
+        v.t = SettingsType::DOUBLE_SETTING;
+        values_[name] = std::move(v);
+    }
 }
 
-std::optional<double> SettingsMixin::get_value_double(
-      const char *name) noexcept {
-    std::optional<double> value;
-    try {
-        value = std::any_cast<double>(values_.at(name));
-    } catch (const std::out_of_range &) {
-        // Nothing
-    } catch (const std::bad_any_cast &) {
-        // Nothing
+bool SettingsMixin::get_value_double(const char *name, double *value) noexcept {
+    if (name == nullptr || value == nullptr || values_.count(name) <= 0) {
+        return false;
     }
-    return value;
+    auto &v = values_.at(name);
+    if (v.t != SettingsType::DOUBLE_SETTING) {
+        return false;
+    }
+    std::stringstream ss;
+    ss << v.v;
+    ss >> *value;
+    if (!ss.eof() || ss.bad()) {
+        return false;
+    }
+    return true;
 }
 
 void SettingsMixin::set_value_int(const char *name, int64_t value) noexcept {
-    values_[name] = value;
+    if (name != nullptr) {
+        SettingsValue v;
+        v.v = std::to_string(value);
+        v.t = SettingsType::INT_SETTING;
+        values_[name] = std::move(v);
+    }
 }
 
-std::optional<int64_t> SettingsMixin::get_value_int(const char *name) noexcept {
-    std::optional<int64_t> value;
-    try {
-        value = std::any_cast<int64_t>(values_.at(name));
-    } catch (const std::out_of_range &) {
-        // Nothing
-    } catch (const std::bad_any_cast &) {
-        // Nothing
+bool SettingsMixin::get_value_int(const char *name, int64_t *value) noexcept {
+    if (name == nullptr || value == nullptr || values_.count(name) <= 0) {
+        return false;
     }
-    return value;
+    auto &v = values_.at(name);
+    if (v.t != SettingsType::INT_SETTING) {
+        return false;
+    }
+    std::stringstream ss;
+    ss << v.v;
+    ss >> *value;
+    if (!ss.eof() || ss.bad()) {
+        return false;
+    }
+    return true;
 }
 
 void SettingsMixin::set_value_string(
       const char *name, std::string value) noexcept {
-    values_[name] = std::move(value);
+    if (name != nullptr) {
+        SettingsValue v;
+        std::swap(v.v, value);
+        v.t = SettingsType::STRING_SETTING;
+        values_[name] = std::move(v);
+    }
 }
 
-std::optional<std::string> SettingsMixin::get_value_string(
-      const char *name) noexcept {
-    std::optional<std::string> value;
-    try {
-        value = std::any_cast<std::string>(values_.at(name));
-    } catch (const std::out_of_range &) {
-        // Nothing
-    } catch (const std::bad_any_cast &) {
-        // Nothing
+bool SettingsMixin::get_value_string(
+      const char *name, std::string *value) noexcept {
+    if (name == nullptr || value == nullptr || values_.count(name) <= 0) {
+        return false;
     }
-    return value;
+    auto &v = values_.at(name);
+    if (v.t != SettingsType::STRING_SETTING) {
+        return false;
+    }
+    *value = v.v;
+    return true;
 }
+
+EventValue::~EventValue() noexcept {}
+LogEventValue::~LogEventValue() noexcept {}
 
 void LoggerAndEmitterMixin::emit_event(Event ev) noexcept {
     if (ev.name != REMK_LOG_EVENT_NAME) {
         std::clog << "[!] unsupported event: " << ev.name << std::endl;
         return;
     }
-    // Note: failure to perform the any_cast is a programmer error
-    auto value = std::move(std::any_cast<LogEventValue>(std::move(ev.value)));
-    switch (value.level) {
+    // Note: failure to perform the cast implies a programmer error
+    auto value = std::dynamic_pointer_cast<LogEventValue>(std::move(ev.value));
+    if (!value) {
+        assert(false);
+        abort();
+        // NOTREACHED
+    }
+    switch (value->level) {
     case REMK_PLATFORM_LOG_WARNING:
         std::clog << "[!] ";
         break;
@@ -92,17 +124,18 @@ void LoggerAndEmitterMixin::emit_event(Event ev) noexcept {
         std::clog << "[?] ";
         break;
     }
-    std::clog << value.message << std::endl;
+    std::clog << value->message << std::endl;
 }
 
 void LoggerAndEmitterMixin::emit_log(
       int level, const std::stringstream &ss) noexcept {
     Event ev;
     ev.name = REMK_LOG_EVENT_NAME;
-    LogEventValue value;
-    value.message = ss.str();
-    value.level = level;
+    auto value = std::make_shared<LogEventValue>();
+    value->message = ss.str();
+    value->level = level;
     ev.value = std::move(value);
+    assert(!!ev.value);
     emit_event(std::move(ev));
 }
 

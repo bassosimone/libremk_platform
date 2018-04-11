@@ -2,11 +2,11 @@ cmake_minimum_required(VERSION 3.1.0)
 project(remk_platform LANGUAGES C CXX)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-set(REMK_PLATFORM_ABI_MAJOR 3)
+set(REMK_PLATFORM_ABI_MAJOR 4)
 set(REMK_PLATFORM_ABI_MINOR 0)
 set(REMK_PLATFORM_ABI_PATCH 0)
 set(REMK_PLATFORM_ABI ${REMK_PLATFORM_ABI_MAJOR}.${REMK_PLATFORM_ABI_MINOR}.${REMK_PLATFORM_ABI_PATCH})
@@ -38,7 +38,7 @@ endif()
 
 add_library(
   remk_platform
-  include/remk/platform.hpp
+  include/remk/platform/platform.hpp
   src/platform.cpp
   src/strcasecmp.h
   src/strtonum.h

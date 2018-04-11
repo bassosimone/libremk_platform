@@ -1,5 +1,5 @@
-#ifndef REMK_PLATFORM_HPP
-#define REMK_PLATFORM_HPP
+#ifndef REMK_PLATFORM_PLATFORM_HPP
+#define REMK_PLATFORM_PLATFORM_HPP
 
 #ifdef _WIN32
 #include <basetsd.h>
@@ -19,9 +19,8 @@
 #include <stdint.h>
 #include <time.h>
 
-#include <any>
 #include <map>
-#include <optional>
+#include <memory>
 #include <sstream>
 #include <string>
 
@@ -58,36 +57,54 @@ using Socklen = socklen_t;
 using Ssize = ssize_t;
 #endif
 
+enum class SettingsType {
+    DOUBLE_SETTING,
+    INT_SETTING,
+    STRING_SETTING
+};
+
+class SettingsValue {
+  public:
+    SettingsType t;
+    std::string v;
+};
+
 class SettingsMixin {
   public:
     void set_value_double(const char *name, double value) noexcept;
 
-    std::optional<double> get_value_double(const char *name) noexcept;
+    bool get_value_double(const char *name, double *value) noexcept;
 
     void set_value_int(const char *name, int64_t value) noexcept;
 
-    std::optional<int64_t> get_value_int(const char *name) noexcept;
+    bool get_value_int(const char *name, int64_t *value) noexcept;
 
     void set_value_string(const char *name, std::string value) noexcept;
 
-    std::optional<std::string> get_value_string(const char *name) noexcept;
+    bool get_value_string(const char *name, std::string *value) noexcept;
 
   private:
-    std::map<std::string, std::any> values_;
+    std::map<std::string, SettingsValue> values_;
+};
+
+class EventValue {
+  public:
+    virtual ~EventValue() noexcept;
 };
 
 class Event {
   public:
     std::string name;
-    std::any value;
+    std::shared_ptr<EventValue> value;
 };
 
 #define REMK_LOG_EVENT_NAME "log"
 
-class LogEventValue {
+class LogEventValue : public EventValue {
   public:
     int level = REMK_PLATFORM_LOG_DEBUG;
     std::string message;
+    virtual ~LogEventValue() noexcept;
 };
 
 class LoggerAndEmitterMixin {
