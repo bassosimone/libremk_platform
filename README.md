@@ -36,8 +36,8 @@ a C++17 class that allows to:
    implementation of Measurement Kit (see the `SettingsMixin` which is one of
    the classes that `Context` inherits from).
 
-6. Log and emit other opaque events (see the `LoggerAndEmitterMixin` another
-   of the classes that `Context` inherits from).
+6. Log and emit other opaque events that occurr during network tests (see the
+   `LoggerAndEmitterMixin` another of the classes that `Context` inherits from).
 
 7. Interrupt long waits or perform periodic actions, by overriding the
    `ctx->select()` method properly.
