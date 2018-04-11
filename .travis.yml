@@ -27,9 +27,9 @@ matrix:
 
     - os: linux
       env: BUILD_TYPE="vanilla"
-           CC=clang
            CXXFLAGS="-stdlib=libc++"
-           CXX=clang++
+           MK_CC=clang
+           MK_CXX=clang++
            VERBOSE=1
       script:
         - ./.ci/docker/script/docker-run bassosimone/mk-debian:testing cmake
