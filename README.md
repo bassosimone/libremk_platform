@@ -61,7 +61,8 @@ the sources or by linking to an external repository.
 ## Building
 
 There are no external dependencies apart from a C++17 library. We use CMake
-to build. The CMake script should perform all the platform checks.
+to build. The CMake script should perform all the platform checks and use
+either platform provided APIs or provide suitable replacements.
 
 To build a static library, from a shell (on Unix) or a MSVC development
 prompt (on Windows), type the following commands:
