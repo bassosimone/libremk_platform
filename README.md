@@ -46,7 +46,7 @@ a C++17 class that allows to:
    use the `printf()` style of printing values.
 
 9. Classify network-related errors that we care about by mapping them onto
-   the same strings currently used by Measurement Kit.
+   the same strings currently used by Measurement Kit as of v0.8.x.
 
 In short, this library is the engine to write tests. To collect measurements
 and perform other actions, Measurement Kit should properly override the
