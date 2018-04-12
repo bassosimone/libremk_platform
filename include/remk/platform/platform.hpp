@@ -200,6 +200,8 @@ class SystemMixin {
 
     virtual int strncasecmp(const char *s1, const char *s2, size_t n) noexcept;
 
+    virtual int shutdown(Socket socket, int how) noexcept;
+
     virtual ~SystemMixin() noexcept;
 };
 

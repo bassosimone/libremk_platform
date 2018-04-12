@@ -328,6 +328,10 @@ int SystemMixin::strncasecmp(
     return ::strncasecmp(s1, s2, n);
 }
 
+int SystemMixin::shutdown(Socket socket, int how) noexcept {
+    return ::shutdown(socket, how);
+}
+
 SystemMixin::~SystemMixin() noexcept {}
 
 double Context::steady_clock_now() noexcept {
