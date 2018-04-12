@@ -620,7 +620,7 @@ DeferClosesocket::DeferClosesocket(Context *ctx, Socket sock) noexcept
     : ctx_{ctx}, sock_{sock} {}
 
 DeferClosesocket::~DeferClosesocket() noexcept {
-    if (sock_ != -1) {
+    if (ctx_ != nullptr && sock_ != -1) {
         (void)ctx_->closesocket(sock_);
     }
 }
@@ -629,7 +629,7 @@ DeferFreeaddrinfo::DeferFreeaddrinfo(Context *ctx, addrinfo *aip) noexcept
     : ctx_{ctx}, aip_{aip} {}
 
 DeferFreeaddrinfo::~DeferFreeaddrinfo() noexcept {
-    if (aip_ != nullptr) {
+    if (ctx_ != nullptr && aip_ != nullptr) {
         (void)ctx_->freeaddrinfo(aip_);
     }
 }
