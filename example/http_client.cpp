@@ -32,8 +32,8 @@ int main() {
         exit(EXIT_FAILURE);
     }
     buffer[(size_t)nbytes] = '\0';
-    REMK_PLATFORM_INFOX(ctx, "recv: nbytes=" << nbytes << " data=" << buffer);
+    REMK_PLATFORM_INFO(ctx, "recv: nbytes=" << nbytes << " data=" << buffer);
     auto end = ctx->steady_clock_now();
-    REMK_PLATFORM_INFOX(ctx, "elapsed time: " << end - begin);
+    REMK_PLATFORM_INFO(ctx, "elapsed time: " << end - begin);
     exit(EXIT_SUCCESS);
 }

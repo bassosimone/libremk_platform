@@ -277,34 +277,22 @@ class DeferFreeaddrinfo {
 } // namespace platform
 } // namespace remk
 
-#define REMK_PLATFORM_EMIT_LOG_(ctx_, level_, statements_, print_last_error_)  \
+#define REMK_PLATFORM_EMIT_LOG_(ctx_, level_, statements_)                     \
     do {                                                                       \
         if (level_ <= ctx_->get_log_level()) {                                 \
             std::stringstream ss;                                              \
             ss << statements_;                                                 \
-            if (print_last_error_) {                                           \
-                ss << ": " << ctx_->get_last_error();                          \
-            }                                                                  \
             ctx_->emit_log(level_, ss);                                        \
         }                                                                      \
     } while (0)
 
 #define REMK_PLATFORM_WARN(ctx_, statements_)                                  \
-    REMK_PLATFORM_EMIT_LOG_(ctx_, REMK_PLATFORM_LOG_WARNING, statements_, true)
-
-#define REMK_PLATFORM_WARNX(ctx_, statements_)                                 \
-    REMK_PLATFORM_EMIT_LOG_(ctx_, REMK_PLATFORM_LOG_WARNING, statements_, false)
+    REMK_PLATFORM_EMIT_LOG_(ctx_, REMK_PLATFORM_LOG_WARNING, statements_)
 
 #define REMK_PLATFORM_INFO(ctx_, statements_)                                  \
-    REMK_PLATFORM_EMIT_LOG_(ctx_, REMK_PLATFORM_LOG_INFO, statements_, true)
-
-#define REMK_PLATFORM_INFOX(ctx_, statements_)                                 \
-    REMK_PLATFORM_EMIT_LOG_(ctx_, REMK_PLATFORM_LOG_INFO, statements_, false)
+    REMK_PLATFORM_EMIT_LOG_(ctx_, REMK_PLATFORM_LOG_INFO, statements_)
 
 #define REMK_PLATFORM_DEBUG(ctx_, statements_)                                 \
-    REMK_PLATFORM_EMIT_LOG_(ctx_, REMK_PLATFORM_LOG_DEBUG, statements_, true)
-
-#define REMK_PLATFORM_DEBUGX(ctx_, statements_)                                \
-    REMK_PLATFORM_EMIT_LOG_(ctx_, REMK_PLATFORM_LOG_DEBUG, statements_, false)
+    REMK_PLATFORM_EMIT_LOG_(ctx_, REMK_PLATFORM_LOG_DEBUG, statements_)
 
 #endif

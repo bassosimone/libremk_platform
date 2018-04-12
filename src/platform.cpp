@@ -438,28 +438,28 @@ Socket Context::connect_tcp(const char *hostname, const char *port) noexcept {
         hints.ai_flags &= ~AI_NUMERICHOST;
         rv = this->getaddrinfo(hostname, port, &hints, &rp);
         if (rv != 0) {
-            REMK_PLATFORM_WARNX(this, "getaddrinfo: " << rv);
+            REMK_PLATFORM_WARN(this, "getaddrinfo: " << rv);
             return -1;
         }
     }
     remk::platform::DeferFreeaddrinfo dfa{this, rp};
-    REMK_PLATFORM_DEBUGX(this, "getaddrinfo: success");
+    REMK_PLATFORM_DEBUG(this, "getaddrinfo: success");
     for (auto ai = rp; ai != nullptr; ai = ai->ai_next) {
         auto sock = this->socket(ai->ai_family, ai->ai_socktype, 0);
         if (sock == -1) {
             REMK_PLATFORM_WARN(this, "socket");
             continue;
         }
-        REMK_PLATFORM_DEBUGX(this, "socket: success");
+        REMK_PLATFORM_DEBUG(this, "socket: success");
         if (this->connect(sock, ai->ai_addr,
                   (remk::platform::Socklen)ai->ai_addrlen) == 0) {
-            REMK_PLATFORM_DEBUGX(this, "connect: success");
+            REMK_PLATFORM_DEBUG(this, "connect: success");
             return sock;
         }
         REMK_PLATFORM_WARN(this, "connect");
         this->closesocket(sock);
     }
-    REMK_PLATFORM_WARNX(this, "all connect attempts failed");
+    REMK_PLATFORM_WARN(this, "all connect attempts failed");
     /* The `errno` value should be the last error that occurred. */
     return -1;
 }
