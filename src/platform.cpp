@@ -430,13 +430,17 @@ Socket Context::connect_tcp(const char *hostname, const char *port) noexcept {
         return -1;
     }
     addrinfo hints{};
-    hints.ai_flags |= AI_NUMERICSERV;
+    hints.ai_flags |= AI_NUMERICHOST | AI_NUMERICSERV;
     hints.ai_socktype = SOCK_STREAM;
     addrinfo *rp = nullptr;
     int rv = this->getaddrinfo(hostname, port, &hints, &rp);
     if (rv != 0) {
-        REMK_PLATFORM_WARNX(this, "getaddrinfo: " << rv);
-        return -1;
+        hints.ai_flags &= ~AI_NUMERICHOST;
+        rv = this->getaddrinfo(hostname, port, &hints, &rp);
+        if (rv != 0) {
+            REMK_PLATFORM_WARNX(this, "getaddrinfo: " << rv);
+            return -1;
+        }
     }
     remk::platform::DeferFreeaddrinfo dfa{this, rp};
     REMK_PLATFORM_DEBUGX(this, "getaddrinfo: success");
