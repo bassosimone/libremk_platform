@@ -19,7 +19,7 @@ int main() {
     }
     remk::platform::DeferClosesocket dcs{ctx.get(), sock};
     std::string req = "GET /robots.txt HTTP/1.0\r\n\r\n";
-    auto nbytes = ctx->writen(
+    auto nbytes = ctx->writen( //
           sock, req.c_str(), (remk::platform::Size)req.size(), 0);
     if (nbytes < 0 || (size_t)nbytes != req.size()) {
         REMK_PLATFORM_WARN(ctx, "send: retval=" << nbytes);
@@ -32,7 +32,9 @@ int main() {
         exit(EXIT_FAILURE);
     }
     buffer[(size_t)nbytes] = '\0';
-    REMK_PLATFORM_INFO(ctx, "recv: nbytes=" << nbytes << " data=" << buffer);
+    REMK_PLATFORM_INFO(ctx,
+          "recv: nbytes=" << nbytes
+                          << " data=" << ctx->hexdump(buffer, (size_t)nbytes));
     auto end = ctx->steady_clock_now();
     REMK_PLATFORM_INFO(ctx, "elapsed time: " << end - begin);
     exit(EXIT_SUCCESS);

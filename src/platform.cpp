@@ -416,10 +416,13 @@ int Context::sockaddr_pton(
 std::string Context::hexdump(const void *data, size_t count) noexcept {
     std::stringstream ss;
     if (data != nullptr) {
-        const unsigned char *cbase = (const unsigned char *)data;
+        const uint8_t *cbase = (const uint8_t *)data;
         for (size_t i = 0; i < count; ++i) {
-            ss << std::hex << std::setfill('0') << std::setw(2)
-               << (unsigned int)cbase[i];
+            uint8_t ch = (uint8_t)cbase[i];
+            ss << std::hex << std::setfill('0') << std::setw(2) << (uint16_t)ch;
+            if (isprint(ch) && !isspace(ch)) {
+                ss << "('" << (char)ch << "')";
+            }
             if (i < count - 1) { // safe b/c min(count) == 1 in this loop
                 ss << " ";
             }
