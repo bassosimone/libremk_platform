@@ -641,5 +641,85 @@ DeferFreeaddrinfo::~DeferFreeaddrinfo() noexcept {
     }
 }
 
+bool OutputBuffer::writen(const std::string &data) noexcept {
+    oss_ << data;
+    return oss_.good();
+}
+
+bool OutputBuffer::write_uint8(uint8_t data) noexcept {
+    oss_ << data;
+    return oss_.good();
+}
+
+bool OutputBuffer::write_uint16(uint16_t data) noexcept {
+    oss_ << htons(data);
+    return oss_.good();
+}
+
+bool OutputBuffer::write_uint32(uint32_t data) noexcept {
+    oss_ << htonl(data);
+    return oss_.good();
+}
+
+std::string OutputBuffer::serialize() noexcept {
+    std::ostringstream temp;
+    std::swap(temp, oss_);
+    return temp.str();
+}
+
+void InputBuffer::append(const std::string &data) noexcept {
+    str_ += data; // complexity: O(data.size())
+}
+
+bool InputBuffer::readn(size_t limit, std::string *data) noexcept {
+    if (str_.size() < limit) {
+        return false;
+    }
+    std::string s = str_.substr(0, limit); // complexity: O(limit)
+    str_.erase(0, limit); // complexity: generally O(str_.size() - limit)
+    if (data != nullptr) {
+        std::swap(*data, s);
+    }
+    return true;
+}
+
+bool InputBuffer::read_uint8(uint8_t *data) noexcept {
+    std::string temp;
+    if (!readn(sizeof (*data), &temp)) {
+        return false;
+    }
+    assert(temp.size() == sizeof (*data));
+    if (data != nullptr) {
+        memcpy(data, temp.data(), sizeof (*data));
+    }
+    return true;
+}
+
+bool InputBuffer::read_uint16(uint16_t *data) noexcept {
+    std::string temp;
+    if (!readn(sizeof (*data), &temp)) {
+        return false;
+    }
+    assert(temp.size() == sizeof (*data));
+    if (data != nullptr) {
+        memcpy(data, temp.data(), sizeof (*data));
+        *data = ntohs(*data);
+    }
+    return true;
+}
+
+bool InputBuffer::read_uint32(uint32_t *data) noexcept {
+    std::string temp;
+    if (!readn(sizeof (*data), &temp)) {
+        return false;
+    }
+    assert(temp.size() == sizeof (*data));
+    if (data != nullptr) {
+        memcpy(data, temp.data(), sizeof (*data));
+        *data = ntohl(*data);
+    }
+    return true;
+}
+
 } // namespace platform
 } // namespace remk

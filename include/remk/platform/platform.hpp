@@ -276,6 +276,38 @@ class DeferFreeaddrinfo {
     addrinfo *aip_;
 };
 
+class OutputBuffer {
+  public:
+    bool writen(const std::string &s) noexcept;
+
+    bool write_uint8(uint8_t data) noexcept;
+
+    bool write_uint16(uint16_t data) noexcept;
+
+    bool write_uint32(uint32_t data) noexcept;
+
+    std::string serialize() noexcept;
+
+  private:
+    std::ostringstream oss_;
+};
+
+class InputBuffer {
+  public:
+    void append(const std::string &data) noexcept;
+
+    bool readn(size_t limit, std::string *data) noexcept;
+
+    bool read_uint8(uint8_t *data) noexcept;
+
+    bool read_uint16(uint16_t *data) noexcept;
+
+    bool read_uint32(uint32_t *data) noexcept;
+
+  private:
+    std::string str_;
+};
+
 } // namespace platform
 } // namespace remk
 
