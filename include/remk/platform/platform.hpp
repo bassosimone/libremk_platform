@@ -120,7 +120,7 @@ class LoggerAndEmitterMixin {
     virtual ~LoggerAndEmitterMixin() noexcept;
 
   private:
-    int level_ = REMK_PLATFORM_LOG_DEBUG;
+    int level_ = REMK_PLATFORM_LOG_WARNING;
 };
 
 class SystemMixin {
@@ -223,15 +223,6 @@ class Context : public LoggerAndEmitterMixin,
 
     virtual Socket connect_tcp(const char *hostname, const char *port) noexcept;
 
-    /* Continue reading until |count| bytes have been read. Internally uses
-       this->select() so you can abort the read loop. */
-    virtual Ssize readn(
-          Socket handle, void *buffer, Size count, int flags) noexcept;
-
-    /* Same as readn() but for writing. */
-    virtual Ssize writen(
-          Socket handle, const void *buffer, Size count, int flags) noexcept;
-
     /* Initializes Windows sockets. Is a no-op on Unix. Must be called
        from the main application, not from a DLL. */
     virtual int wsainit() noexcept;
@@ -244,68 +235,6 @@ class Context : public LoggerAndEmitterMixin,
     static std::string classify_system_error(int system_error) noexcept;
 
     static bool is_valid_utf8(const std::string &str) noexcept;
-};
-
-class DeferClosesocket {
-  public:
-    DeferClosesocket(Context *ctx, Socket sock) noexcept;
-    ~DeferClosesocket() noexcept;
-
-    DeferClosesocket(const DeferClosesocket &) = delete;
-    DeferClosesocket &operator=(const DeferClosesocket &) = delete;
-    DeferClosesocket(DeferClosesocket &&) = delete;
-    DeferClosesocket &operator=(DeferClosesocket &&) = delete;
-
-  private:
-    Context *ctx_;
-    Socket sock_;
-};
-
-class DeferFreeaddrinfo {
-  public:
-    DeferFreeaddrinfo(Context *ctx, addrinfo *aip) noexcept;
-    ~DeferFreeaddrinfo() noexcept;
-
-    DeferFreeaddrinfo(const DeferFreeaddrinfo &) = delete;
-    DeferFreeaddrinfo &operator=(const DeferFreeaddrinfo &) = delete;
-    DeferFreeaddrinfo(DeferFreeaddrinfo &&) = delete;
-    DeferFreeaddrinfo &operator=(DeferFreeaddrinfo &&) = delete;
-
-  private:
-    Context *ctx_;
-    addrinfo *aip_;
-};
-
-class OutputBuffer {
-  public:
-    bool writen(const std::string &s) noexcept;
-
-    bool write_uint8(uint8_t data) noexcept;
-
-    bool write_uint16(uint16_t data) noexcept;
-
-    bool write_uint32(uint32_t data) noexcept;
-
-    std::string serialize() noexcept;
-
-  private:
-    std::ostringstream oss_;
-};
-
-class InputBuffer {
-  public:
-    void append(const std::string &data) noexcept;
-
-    bool readn(size_t limit, std::string *data) noexcept;
-
-    bool read_uint8(uint8_t *data) noexcept;
-
-    bool read_uint16(uint16_t *data) noexcept;
-
-    bool read_uint32(uint32_t *data) noexcept;
-
-  private:
-    std::string str_;
 };
 
 } // namespace platform

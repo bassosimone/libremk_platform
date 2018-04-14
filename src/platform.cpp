@@ -104,9 +104,9 @@ void LoggerAndEmitterMixin::emit_event(Event ev) noexcept {
         std::clog << "[!] unsupported event: " << ev.name << std::endl;
         return;
     }
-    // Note: failure to perform the cast implies a programmer error
     auto value = std::dynamic_pointer_cast<LogEventValue>(std::move(ev.value));
     if (!value) {
+        // Note: failure to perform the cast implies a programmer error
         assert(false);
         abort();
         // NOTREACHED
@@ -420,9 +420,6 @@ std::string Context::hexdump(const void *data, size_t count) noexcept {
         for (size_t i = 0; i < count; ++i) {
             uint8_t ch = (uint8_t)cbase[i];
             ss << std::hex << std::setfill('0') << std::setw(2) << (uint16_t)ch;
-            if (isprint(ch) && !isspace(ch)) {
-                ss << "('" << (char)ch << "')";
-            }
             if (i < count - 1) { // safe b/c min(count) == 1 in this loop
                 ss << " ";
             }
@@ -449,7 +446,6 @@ Socket Context::connect_tcp(const char *hostname, const char *port) noexcept {
             return -1;
         }
     }
-    remk::platform::DeferFreeaddrinfo dfa{this, rp};
     REMK_PLATFORM_DEBUG(this, "getaddrinfo: success");
     for (auto ai = rp; ai != nullptr; ai = ai->ai_next) {
         auto sock = this->socket(ai->ai_family, ai->ai_socktype, 0);
@@ -461,86 +457,16 @@ Socket Context::connect_tcp(const char *hostname, const char *port) noexcept {
         if (this->connect(sock, ai->ai_addr,
                   (remk::platform::Socklen)ai->ai_addrlen) == 0) {
             REMK_PLATFORM_DEBUG(this, "connect: success");
+            this->freeaddrinfo(rp);
             return sock;
         }
         REMK_PLATFORM_WARN(this, "connect");
         this->closesocket(sock);
     }
     REMK_PLATFORM_WARN(this, "all connect attempts failed");
-    /* The `errno` value should be the last error that occurred. */
+    // The `errno` value is determined by the last error that occurred
+    this->freeaddrinfo(rp);
     return -1;
-}
-
-Ssize Context::readn(
-      Socket handle, void *buffer, Size count, int flags) noexcept {
-    Ssize retval = 0;
-    Size off = 0;
-    while (off < count) {
-        // Be reactive so it works with blocking sockets as well.
-        fd_set readset;
-        FD_ZERO(&readset);
-        FD_SET(handle, &readset);
-        int ctrl = this->select( //
-              handle + 1, &readset, nullptr, nullptr, nullptr);
-        if (ctrl == -1) {
-#ifndef _WIN32
-            if (errno == EINTR) {
-                continue;
-            }
-#endif
-            return -1;
-        }
-        assert(ctrl > 0);
-        // Cast to `char *` required to force pointer arithmetics.
-        Ssize n = this->recv(handle, (char *)buffer + off, count - off, flags);
-        if (n <= 0) {
-            return n; // Either all success or failure.
-        }
-        // Make sure `retval += n` won't overflow `INT_MAX` (arbitrary).
-        if (n > INT_MAX || retval > INT_MAX - n) {
-            this->set_last_error(REMK_PLATFORM_ERROR_NAME(INVAL));
-            return -1;
-        }
-        retval += n;
-        off += (Size)n;
-    }
-    return retval;
-}
-
-Ssize Context::writen(
-      Socket handle, const void *buffer, Size count, int flags) noexcept {
-    Ssize retval = 0;
-    Size off = 0;
-    while (off < count) {
-        // Be reactive so it works with blocking sockets as well.
-        fd_set writeset;
-        FD_ZERO(&writeset);
-        FD_SET(handle, &writeset);
-        int ctrl = this->select( //
-              handle + 1, nullptr, &writeset, nullptr, nullptr);
-        if (ctrl == -1) {
-#ifndef _WIN32
-            if (errno == EINTR) {
-                continue;
-            }
-#endif
-            return -1;
-        }
-        assert(ctrl > 0);
-        // Cast to `char *` required to force pointer arithmetics.
-        Ssize n = this->send(handle, (char *)buffer + off, count - off, flags);
-        if (n <= 0) {
-            return n; // Either all success or failure.
-        }
-        // Make sure `retval += n` won't overflow `INT_MAX` (arbitrary).
-        if (n > INT_MAX || retval > INT_MAX - n) {
-            this->set_last_error(REMK_PLATFORM_ERROR_NAME(INVAL));
-            return -1;
-        }
-        retval += n;
-        off += (Size)n;
-    }
-    return retval;
 }
 
 int Context::wsainit() noexcept {
@@ -621,104 +547,6 @@ Context::~Context() noexcept {}
         }
     }
     return state == UTF8_ACCEPT;
-}
-
-DeferClosesocket::DeferClosesocket(Context *ctx, Socket sock) noexcept
-    : ctx_{ctx}, sock_{sock} {}
-
-DeferClosesocket::~DeferClosesocket() noexcept {
-    if (ctx_ != nullptr && sock_ != -1) {
-        (void)ctx_->closesocket(sock_);
-    }
-}
-
-DeferFreeaddrinfo::DeferFreeaddrinfo(Context *ctx, addrinfo *aip) noexcept
-    : ctx_{ctx}, aip_{aip} {}
-
-DeferFreeaddrinfo::~DeferFreeaddrinfo() noexcept {
-    if (ctx_ != nullptr && aip_ != nullptr) {
-        (void)ctx_->freeaddrinfo(aip_);
-    }
-}
-
-bool OutputBuffer::writen(const std::string &data) noexcept {
-    oss_ << data;
-    return oss_.good();
-}
-
-bool OutputBuffer::write_uint8(uint8_t data) noexcept {
-    oss_ << data;
-    return oss_.good();
-}
-
-bool OutputBuffer::write_uint16(uint16_t data) noexcept {
-    oss_ << htons(data);
-    return oss_.good();
-}
-
-bool OutputBuffer::write_uint32(uint32_t data) noexcept {
-    oss_ << htonl(data);
-    return oss_.good();
-}
-
-std::string OutputBuffer::serialize() noexcept {
-    std::ostringstream temp;
-    std::swap(temp, oss_);
-    return temp.str();
-}
-
-void InputBuffer::append(const std::string &data) noexcept {
-    str_ += data; // complexity: O(data.size())
-}
-
-bool InputBuffer::readn(size_t limit, std::string *data) noexcept {
-    if (str_.size() < limit) {
-        return false;
-    }
-    std::string s = str_.substr(0, limit); // complexity: O(limit)
-    str_.erase(0, limit); // complexity: generally O(str_.size() - limit)
-    if (data != nullptr) {
-        std::swap(*data, s);
-    }
-    return true;
-}
-
-bool InputBuffer::read_uint8(uint8_t *data) noexcept {
-    std::string temp;
-    if (!readn(sizeof (*data), &temp)) {
-        return false;
-    }
-    assert(temp.size() == sizeof (*data));
-    if (data != nullptr) {
-        memcpy(data, temp.data(), sizeof (*data));
-    }
-    return true;
-}
-
-bool InputBuffer::read_uint16(uint16_t *data) noexcept {
-    std::string temp;
-    if (!readn(sizeof (*data), &temp)) {
-        return false;
-    }
-    assert(temp.size() == sizeof (*data));
-    if (data != nullptr) {
-        memcpy(data, temp.data(), sizeof (*data));
-        *data = ntohs(*data);
-    }
-    return true;
-}
-
-bool InputBuffer::read_uint32(uint32_t *data) noexcept {
-    std::string temp;
-    if (!readn(sizeof (*data), &temp)) {
-        return false;
-    }
-    assert(temp.size() == sizeof (*data));
-    if (data != nullptr) {
-        memcpy(data, temp.data(), sizeof (*data));
-        *data = ntohl(*data);
-    }
-    return true;
 }
 
 } // namespace platform

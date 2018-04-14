@@ -23,32 +23,29 @@ is `remk::platform::Context`. It is a C++14 class that allows to:
    `getaddrinfo()` based on [c-ares](https://github.com/c-ares/c-ares) that
    collects timing and packet-content information. This allows one to write
    network tests using the above mentioned Unix-like API, without having
-   to wonder about collecting low-level data, which can instead be collected
+   to worry about collecting low-level data, which can instead be collected
    by overriding the implementation of the called methods.
 
 3. Write less code, thanks to syntactic sugar functionality, like
    `ctx->connect_tcp()`, that perform common tasks.
 
-4. Write more correct code, thanks to wrapper classes like `DeferClosesocket`
-   that guarantee that resources are cleared in a RAII fashion.
-
-5. Carry around configuration information in a way compatible with the current
+4. Carry around configuration information in a way compatible with the current
    implementation of Measurement Kit (see the `SettingsMixin` which is one of
    the classes that `Context` inherits from).
 
-6. Log and emit other opaque events that occurr during network tests (see the
+5. Log and emit other opaque events that occurr during network tests (see the
    `LoggerAndEmitterMixin` another of the classes that `Context` inherits from).
 
-7. Interrupt long waits or perform periodic actions, by overriding the
+6. Interrupt long waits or perform periodic actions, by overriding the
    `ctx->select()` method properly.
 
-8. Write more secure code, by providing a logging interface that does not
+7. Write more secure code, by providing a logging interface that does not
    use the `printf()` style of printing values.
 
-9. Classify network-related errors that we care about by mapping them onto
+8. Classify network-related errors that we care about by mapping them onto
    the same strings currently used by Measurement Kit as of v0.8.x.
 
-10. Collect precise timing information using a steady clock.
+9. Collect precise timing information using a steady clock.
 
 In short, this library is the engine to write tests. To collect measurements
 and perform other actions, Measurement Kit should properly override the

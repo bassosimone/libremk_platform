@@ -8,6 +8,7 @@
 
 int main() {
     auto ctx = std::make_unique<remk::platform::Context>();
+    ctx->set_log_level(REMK_PLATFORM_LOG_DEBUG);
     if (ctx->wsainit() != 0) {
         REMK_PLATFORM_WARN(ctx, "wsainit");
         exit(EXIT_FAILURE);
@@ -17,18 +18,19 @@ int main() {
     if (sock == -1) {
         exit(EXIT_FAILURE);
     }
-    remk::platform::DeferClosesocket dcs{ctx.get(), sock};
     std::string req = "GET /robots.txt HTTP/1.0\r\n\r\n";
-    auto nbytes = ctx->writen( //
+    auto nbytes = ctx->send( //
           sock, req.c_str(), (remk::platform::Size)req.size(), 0);
     if (nbytes < 0 || (size_t)nbytes != req.size()) {
         REMK_PLATFORM_WARN(ctx, "send: retval=" << nbytes);
+        (void)ctx->closesocket(sock);
         exit(EXIT_FAILURE);
     }
     char buffer[7];
-    nbytes = ctx->readn(sock, buffer, sizeof(buffer) - 1, 0);
+    nbytes = ctx->recv(sock, buffer, sizeof(buffer) - 1, 0);
     if (nbytes <= 0) {
         REMK_PLATFORM_WARN(ctx, "recv: retval=" << nbytes);
+        (void)ctx->closesocket(sock);
         exit(EXIT_FAILURE);
     }
     buffer[(size_t)nbytes] = '\0';
@@ -37,5 +39,6 @@ int main() {
                           << " data=" << ctx->hexdump(buffer, (size_t)nbytes));
     auto end = ctx->steady_clock_now();
     REMK_PLATFORM_INFO(ctx, "elapsed time: " << end - begin);
+    (void)ctx->closesocket(sock);
     exit(EXIT_SUCCESS);
 }
